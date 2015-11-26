@@ -9,7 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
+
+import java.util.Random;
 
 
 public class player extends AppCompatActivity implements mpService.CallBacks{
@@ -17,7 +20,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     /**
      * Variables
      */
-    Button btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious;
+    ImageButton btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious, btnShuffle;
     TextView tvSongName,tvSongDuration;
     String songUris[],songNames[];
     int songIndex = 0;
@@ -27,6 +30,9 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     Intent IMusicService;
     private timer t;
     long songDuration;
+    boolean isPaused = false;
+    boolean isShuffleOn = false;
+    Random rand;
 
 
 
@@ -67,12 +73,13 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
 
     private void initializeViewComponents()
     {
-        btnGoBack = (Button)findViewById(R.id.buttonBack);
-        btnStart = (Button)findViewById(R.id.buttonStart);
-        btnPause = (Button)findViewById(R.id.buttonPause);
-        btnStop = (Button)findViewById(R.id.buttonStop);
-        btnPrevious = (Button)findViewById(R.id.buttonPrev);
-        btnNext = (Button)findViewById(R.id.buttonNext);
+        btnGoBack = (ImageButton)findViewById(R.id.buttonBack);
+        btnStart = (ImageButton)findViewById(R.id.buttonStart);
+        btnPause = (ImageButton)findViewById(R.id.buttonPause);
+        btnStop = (ImageButton)findViewById(R.id.buttonStop);
+        btnPrevious = (ImageButton)findViewById(R.id.buttonPrev);
+        btnNext = (ImageButton)findViewById(R.id.buttonNext);
+        btnShuffle = (ImageButton)findViewById(R.id.imageButtonShuffle);
 
 
         tvSongDuration = (TextView)findViewById(R.id.textViewSongTime);
@@ -92,8 +99,12 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
             public void onClick(View v) {
                 if(mpServiceBound) {
                     musicService.playSong();
+                    if(isPaused) {
+                        if (t != null) t.start();
+                        isPaused = false;
+                    }
                 }
-                if(t!=null)t.start();
+
 
 
             }
@@ -111,6 +122,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
                 {
                     t.cancel();
                     t = new timer(player.this,songDuration-musicService.getDuration(),1000);
+                    isPaused =true;
                 }
             }
         });
@@ -130,15 +142,21 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
             public void onClick(View v) {
                 if(mpServiceBound)
                 {
-                    //making sure index will remain in range
-                    if(songIndex==songCount-1)
-                    {
-                        songIndex =0;
-                        musicService.getSong(songUris[songIndex]);
-                        updateTextViews();
+                    if(!isShuffleOn) {
+                        //making sure index will remain in range
+                        if (songIndex == songCount - 1) {
+                            songIndex = 0;
+                            musicService.getSong(songUris[songIndex]);
+                            updateTextViews();
+                        } else {
+                            songIndex++;
+                            musicService.getSong(songUris[songIndex]);
+                            updateTextViews();
+                        }
                     }
-                    else {
-                        songIndex++;
+                    else
+                    {
+                        songIndex = getRandomIndex();
                         musicService.getSong(songUris[songIndex]);
                         updateTextViews();
                     }
@@ -151,17 +169,40 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
             public void onClick(View v) {
                 if(mpServiceBound)
                 {
-                    if(songIndex==0)
+                    if(!isShuffleOn) {
+                        if (songIndex == 0) {
+                            songIndex = songCount - 1;
+                            musicService.getSong(songUris[songIndex]);
+                            updateTextViews();
+                        } else {
+                            songIndex--;
+                            musicService.getSong(songUris[songIndex]);
+                            updateTextViews();
+                        }
+                    }
+                    else
                     {
-                        songIndex =songCount-1;
+                        songIndex = getRandomIndex();
                         musicService.getSong(songUris[songIndex]);
                         updateTextViews();
                     }
-                    else {
-                        songIndex--;
-                        musicService.getSong(songUris[songIndex]);
-                        updateTextViews();
-                    }
+                }
+            }
+        });
+
+        btnShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isShuffleOn)
+                {
+                    btnShuffle.setImageResource(R.drawable.shuffleoff);
+                    isShuffleOn = false;
+                }
+                else
+                {
+                    btnShuffle.setImageResource(R.drawable.shuffleon);
+                    isShuffleOn = true;
+                    rand = new Random();
                 }
             }
         });
@@ -212,8 +253,44 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         songDuration = milis;
     }
 
+    /**
+     * changing song when mpService notify that the track has ended
+     * @param onSongComplition
+     */
+    @Override
+    public void updateClient(boolean onSongComplition) {
+        if(mpServiceBound && onSongComplition)
+        {
+            if(!isShuffleOn) {
+                //making sure index will remain in range
+                if (songIndex == songCount - 1) {
+                    songIndex = 0;
+                    musicService.getSong(songUris[songIndex]);
+                    updateTextViews();
+                } else {
+                    songIndex++;
+                    musicService.getSong(songUris[songIndex]);
+                    updateTextViews();
+                }
+            }
+            else
+            {
+                songIndex = getRandomIndex();
+                musicService.getSong(songUris[songIndex]);
+                updateTextViews();
+            }
+        }
+
+    }
+
     public TextView getTvSongDuration()
     {
         return tvSongDuration;
+    }
+
+    private int getRandomIndex()
+    {
+        return rand.nextInt(songCount);
+
     }
 }

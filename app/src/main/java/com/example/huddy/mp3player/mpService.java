@@ -88,10 +88,15 @@ public class mpService extends Service {
                     public void onPrepared(MediaPlayer mp) {
                         duration = mp.getDuration();
                         mp.start();
-                        if(activity!=null)
-                        {
+                        if (activity != null) {
                             activity.updateClient(duration);
                         }
+                    }
+                });
+                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        activity.updateClient(true);
                     }
                 });
             //TODO:change it to be more usefull in case of exception
@@ -101,6 +106,7 @@ public class mpService extends Service {
         }
 
     }
+
 
     public int getDuration() {
         return duration;
@@ -112,6 +118,7 @@ public class mpService extends Service {
      */
     public interface CallBacks{
         void updateClient(long milis);
+        void updateClient(boolean onSongComplition);
     }
 
     /**

@@ -12,5 +12,5 @@
         android:id="@+id/PlayList"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:background="#3e3737" />
+        android:background="#ffffff" />
 </RelativeLayout>
