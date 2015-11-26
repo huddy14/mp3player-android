@@ -19,10 +19,12 @@ public class playlist extends AppCompatActivity {
     ListView lv;
     String[] items;
     String[] songUris;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
+        final Bundle extras = getIntent().getExtras();
 
         lv = (ListView) findViewById(R.id.PlayList);
         final ArrayList<File> mySongs;
@@ -51,6 +53,7 @@ public class playlist extends AppCompatActivity {
                 playerIntent.putExtra("SELECTED_SONG_NAME",items);
                 playerIntent.putExtra("INDEX",position);
                 playerIntent.putExtra("COUNT",mySongs.size());
+                //playerIntent.putExtra("ISPLAYING",extras.getBoolean("ISPLAYING"))
                 startActivity(playerIntent);
             }
         });

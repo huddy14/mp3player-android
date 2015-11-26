@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.IOException;
+
 
 public class player extends AppCompatActivity {
 
@@ -21,6 +23,7 @@ public class player extends AppCompatActivity {
     String songUris[],songNames[];
     int songIndex = 0;
     int songCount = 0;
+    Boolean isCurrentlyPlaying = false;
 
 
 
@@ -28,7 +31,8 @@ public class player extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        stopSong();
+        //stopSong();
+        //mp.release();
         setVariables();
         initializeViewComponents();
 
@@ -93,10 +97,12 @@ public class player extends AppCompatActivity {
         songNames = new String[songCount];
         songUris= extras.getStringArray("SELECTED_SONG_URI_STRING");
         songNames = extras.getStringArray("SELECTED_SONG_NAME");
+        //isCurrentlyPlaying = extras.getBoolean("ISPLAYING");
         getSong(songUris[songIndex]);
     }
     private void startPlaylistActivity() {
         Intent Iplaylist = new Intent(player.this, playlist.class);
+//        if(mp.isPlaying())Iplaylist.putExtra("ISPLAYING",true);
         startActivity(Iplaylist);
     }
 
@@ -124,6 +130,22 @@ public class player extends AppCompatActivity {
     private void getSong (String song)
     {
         mp = MediaPlayer.create(this, Uri.parse(song));
+        /*
+        if(mp == null)
+            mp = MediaPlayer.create(this, Uri.parse(song));
+        else
+        {
+            if(mp.isPlaying())
+                mp.stop();
+            else
+            {
+            try {
+                mp.setDataSource(this, Uri.parse(song));
+            } catch (IOException e) {
+                tvSongName.setText(e.getMessage());
+            }
+        }
+                */
     }
 
 
