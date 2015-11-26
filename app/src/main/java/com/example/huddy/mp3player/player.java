@@ -4,8 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,10 +11,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.io.IOException;
 
-
-public class player extends AppCompatActivity {
+public class player extends AppCompatActivity implements mpService.CallBacks{
 
     /**
      * Variables
@@ -29,7 +25,8 @@ public class player extends AppCompatActivity {
     boolean mpServiceBound = false;
     mpService musicService;
     Intent IMusicService;
-    int songDuration;
+    private timer t;
+    long songDuration;
 
 
 
@@ -40,9 +37,6 @@ public class player extends AppCompatActivity {
         setContentView(R.layout.activity_player);
         setVariables();
         initializeViewComponents();
-
-
-
     }
 
     @Override
@@ -51,9 +45,6 @@ public class player extends AppCompatActivity {
         IMusicService = new Intent(this,mpService.class);
         startService(IMusicService);
         bindService(IMusicService, MusicServiceConnection, Context.BIND_AUTO_CREATE);
-
-
-
     }
 
     private ServiceConnection MusicServiceConnection = new ServiceConnection() {
@@ -62,13 +53,9 @@ public class player extends AppCompatActivity {
             mpService.MyBinder myBinder = (mpService.MyBinder) service;
             musicService = myBinder.getService();
             mpServiceBound = true;
-
+            musicService.registerCallBacksClient(player.this);
             musicService.getSong(songUris[songIndex]);
-
             updateTextViews();
-
-
-
         }
 
         @Override
@@ -106,16 +93,25 @@ public class player extends AppCompatActivity {
                 if(mpServiceBound) {
                     musicService.playSong();
                 }
+                if(t!=null)t.start();
 
 
             }
         });
-
+        /**
+         * Pause button
+         *
+         */
         btnPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(mpServiceBound)
                     musicService.pauseSong();
+                if(t!=null)
+                {
+                    t.cancel();
+                    t = new timer(player.this,songDuration-musicService.getDuration(),1000);
+                }
             }
         });
 
@@ -134,6 +130,7 @@ public class player extends AppCompatActivity {
             public void onClick(View v) {
                 if(mpServiceBound)
                 {
+                    //making sure index will remain in range
                     if(songIndex==songCount-1)
                     {
                         songIndex =0;
@@ -179,9 +176,12 @@ public class player extends AppCompatActivity {
         songNames = new String[songCount];
         songUris= extras.getStringArray("SELECTED_SONG_URI_STRING");
         songNames = extras.getStringArray("SELECTED_SONG_NAME");
-        //isCurrentlyPlaying = extras.getBoolean("ISPLAYING");
-        //musicService.getSong(songUris[songIndex]);
+
     }
+
+    /**
+     * Changing the activity focus to @playlist
+     */
     private void startPlaylistActivity() {
         Intent Iplaylist = new Intent(player.this, playlist.class);
         startActivity(Iplaylist);
@@ -190,9 +190,30 @@ public class player extends AppCompatActivity {
 
     private void updateTextViews()
     {
-        tvSongName.setText(songIndex+1+". "+songNames[songIndex]);
-        tvSongDuration.setText(""+musicService.getDuration()/1000);
+        tvSongName.setText(songIndex + 1 + ". " + songNames[songIndex]);
+        //tvSongDuration.setText(""+musicService.getDuration()/1000);
     }
 
+    /**
+     * Implemented interface, allows us to communicate with service
+     * @param milis getting track duration in miliseconds
+     */
+    @Override
+    public void updateClient(long milis) {
+        if(t!=null) {
+            t.cancel();
+            t = new timer(player.this, milis, 1000);
+            t.start();
+        }
+        else {
+            t = new timer(player.this, milis, 1000);
+            t.start();
+        }
+        songDuration = milis;
+    }
 
+    public TextView getTvSongDuration()
+    {
+        return tvSongDuration;
+    }
 }

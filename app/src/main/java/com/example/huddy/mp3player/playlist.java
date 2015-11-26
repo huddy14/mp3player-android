@@ -39,9 +39,10 @@ public class playlist extends AppCompatActivity {
             songNames[i] = mySongs.get(i).getName().toString();
             songUris[i] = mySongs.get(i).getAbsolutePath();
         }
-
+        //adapter is usefull for filling out listview objects
         ArrayAdapter<String> adp = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,songNames);
         lv.setAdapter(adp);
+        //TODO: consider changing raw strings to constans delcared in a file
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -58,7 +59,7 @@ public class playlist extends AppCompatActivity {
 
     }
 
-
+    //TODO: add mp3 and wav files from internal storage !
     public ArrayList<File> findSongs(File root)
     {
         ArrayList<File> all = new ArrayList<File>();
