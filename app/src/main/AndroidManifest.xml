@@ -19,6 +19,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".player" />
+
+        <service
+            android:name=".mpService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

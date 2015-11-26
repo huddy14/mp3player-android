@@ -1,8 +1,12 @@
 package com.example.huddy.mp3player;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,13 +21,16 @@ public class player extends AppCompatActivity {
     /**
      * Variables
      */
-    Button btnGoBack, btnStart, btnStop, btnPause;
-    TextView tvSongName;
-    MediaPlayer mp = null;
+    Button btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious;
+    TextView tvSongName,tvSongDuration;
     String songUris[],songNames[];
     int songIndex = 0;
     int songCount = 0;
-    Boolean isCurrentlyPlaying = false;
+    boolean mpServiceBound = false;
+    mpService musicService;
+    Intent IMusicService;
+    int songDuration;
+
 
 
 
@@ -31,15 +38,46 @@ public class player extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        //stopSong();
-        //mp.release();
         setVariables();
         initializeViewComponents();
 
-        playSong();
 
 
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IMusicService = new Intent(this,mpService.class);
+        startService(IMusicService);
+        bindService(IMusicService, MusicServiceConnection, Context.BIND_AUTO_CREATE);
+
+
+
+    }
+
+    private ServiceConnection MusicServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mpService.MyBinder myBinder = (mpService.MyBinder) service;
+            musicService = myBinder.getService();
+            mpServiceBound = true;
+
+            musicService.getSong(songUris[songIndex]);
+
+            tvSongName.setText(songNames[songIndex]);
+            tvSongDuration.setText(""+musicService.getDuration()/1000);
+
+
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mpServiceBound =false;
+        }
+    };
+
 
     private void initializeViewComponents()
     {
@@ -48,9 +86,9 @@ public class player extends AppCompatActivity {
         btnPause = (Button)findViewById(R.id.buttonPause);
         btnStop = (Button)findViewById(R.id.buttonStop);
 
-
+        tvSongDuration = (TextView)findViewById(R.id.textViewSongTime);
         tvSongName = (TextView)findViewById(R.id.textViewSongName);
-        tvSongName.setText(songNames[songIndex]);
+
         //....
         btnGoBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,8 +101,9 @@ public class player extends AppCompatActivity {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                playSong();
+                if(mpServiceBound) {
+                    musicService.playSong();
+                }
 
 
             }
@@ -73,17 +112,18 @@ public class player extends AppCompatActivity {
         btnPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pauseSong();
+                if(mpServiceBound)
+                    musicService.pauseSong();
             }
         });
 
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopSong();
-                startPlaylistActivity();
-
-
+                if(mpServiceBound) {
+                    musicService.stopSong();
+                    startPlaylistActivity();
+                }
             }
         });
     }
@@ -98,55 +138,15 @@ public class player extends AppCompatActivity {
         songUris= extras.getStringArray("SELECTED_SONG_URI_STRING");
         songNames = extras.getStringArray("SELECTED_SONG_NAME");
         //isCurrentlyPlaying = extras.getBoolean("ISPLAYING");
-        getSong(songUris[songIndex]);
+        //musicService.getSong(songUris[songIndex]);
     }
     private void startPlaylistActivity() {
         Intent Iplaylist = new Intent(player.this, playlist.class);
-//        if(mp.isPlaying())Iplaylist.putExtra("ISPLAYING",true);
         startActivity(Iplaylist);
+
     }
 
-    private void playSong ()
-    {
-        if(mp!=null)
-            mp.start();
-    }
 
-    private void pauseSong()
-    {
-        if (mp != null)
-            mp.pause();
-    }
-
-    private void stopSong()
-    {
-        if (mp != null) {
-            mp.stop();
-            mp.release();
-            mp = null;
-        }
-    }
-
-    private void getSong (String song)
-    {
-        mp = MediaPlayer.create(this, Uri.parse(song));
-        /*
-        if(mp == null)
-            mp = MediaPlayer.create(this, Uri.parse(song));
-        else
-        {
-            if(mp.isPlaying())
-                mp.stop();
-            else
-            {
-            try {
-                mp.setDataSource(this, Uri.parse(song));
-            } catch (IOException e) {
-                tvSongName.setText(e.getMessage());
-            }
-        }
-                */
-    }
 
 
 }
