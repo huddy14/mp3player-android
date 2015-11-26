@@ -65,8 +65,7 @@ public class player extends AppCompatActivity {
 
             musicService.getSong(songUris[songIndex]);
 
-            tvSongName.setText(songNames[songIndex]);
-            tvSongDuration.setText(""+musicService.getDuration()/1000);
+            updateTextViews();
 
 
 
@@ -85,6 +84,9 @@ public class player extends AppCompatActivity {
         btnStart = (Button)findViewById(R.id.buttonStart);
         btnPause = (Button)findViewById(R.id.buttonPause);
         btnStop = (Button)findViewById(R.id.buttonStop);
+        btnPrevious = (Button)findViewById(R.id.buttonPrev);
+        btnNext = (Button)findViewById(R.id.buttonNext);
+
 
         tvSongDuration = (TextView)findViewById(R.id.textViewSongTime);
         tvSongName = (TextView)findViewById(R.id.textViewSongName);
@@ -126,6 +128,46 @@ public class player extends AppCompatActivity {
                 }
             }
         });
+
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mpServiceBound)
+                {
+                    if(songIndex==songCount-1)
+                    {
+                        songIndex =0;
+                        musicService.getSong(songUris[songIndex]);
+                        updateTextViews();
+                    }
+                    else {
+                        songIndex++;
+                        musicService.getSong(songUris[songIndex]);
+                        updateTextViews();
+                    }
+                }
+            }
+        });
+
+        btnPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mpServiceBound)
+                {
+                    if(songIndex==0)
+                    {
+                        songIndex =songCount-1;
+                        musicService.getSong(songUris[songIndex]);
+                        updateTextViews();
+                    }
+                    else {
+                        songIndex--;
+                        musicService.getSong(songUris[songIndex]);
+                        updateTextViews();
+                    }
+                }
+            }
+        });
     }
 
     private void setVariables()
@@ -146,7 +188,11 @@ public class player extends AppCompatActivity {
 
     }
 
-
+    private void updateTextViews()
+    {
+        tvSongName.setText(songIndex+1+". "+songNames[songIndex]);
+        tvSongDuration.setText(""+musicService.getDuration()/1000);
+    }
 
 
 }

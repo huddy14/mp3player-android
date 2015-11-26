@@ -14,6 +14,7 @@ public class mpService extends Service {
 
     private MediaPlayer mp = new MediaPlayer();
     private IBinder mpBinder = new MyBinder();
+    private int duration;
     public mpService() {
     }
 
@@ -82,6 +83,7 @@ public class mpService extends Service {
                 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(MediaPlayer mp) {
+                        duration = mp.getDuration();
                         mp.start();
                     }
                 });
@@ -94,7 +96,8 @@ public class mpService extends Service {
     }
 
     public int getDuration() {
-        return mp.getDuration();
+        return duration;
+
     }
 
 

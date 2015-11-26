@@ -41,32 +41,60 @@
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_gravity="center_horizontal"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_weight="1">
 
-        <Button
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:text="STOP"
-            android:id="@+id/buttonStop"
-            android:layout_weight="1" />
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1">
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:text="PAUSE"
-            android:id="@+id/buttonPause"
-            android:layout_weight="1" />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="STOP"
+                android:id="@+id/buttonStop"
+                android:layout_weight="1" />
 
-        <Button
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="PAUSE"
+                android:id="@+id/buttonPause"
+                android:layout_weight="1" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="START"
+                android:id="@+id/buttonStart"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:text="START"
-            android:id="@+id/buttonStart"
-            android:layout_weight="1" />
+            android:layout_weight="1">
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="PREVIOUS"
+                android:id="@+id/buttonPrev"
+                android:layout_weight="1" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="NEXT"
+                android:id="@+id/buttonNext"
+                android:layout_weight="1" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
