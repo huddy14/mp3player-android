@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,6 +23,9 @@ public class playlist extends AppCompatActivity {
     ListView lv;
     String[] songNames;
     String[] songUris;
+    Button test;
+    Intent playerIntent;
+    int pos;
 
 
 
@@ -30,18 +34,11 @@ public class playlist extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
 
-        final ArrayList<File> mySongs;
-        mySongs = findSongs(Environment.getExternalStorageDirectory());
+        Bundle extras = getIntent().getExtras();
+        songNames = extras.getStringArray("SONGNAMES");
         lv = (ListView) findViewById(R.id.PlayList);
 
-        songNames = new String[ mySongs.size() ];
-        songUris = new String[ mySongs.size() ];
 
-        for(int i=0;i<mySongs.size();i++)
-        {
-            songNames[i] = mySongs.get(i).getName().toString();
-            songUris[i] = mySongs.get(i).getAbsolutePath();
-        }
         //adapter is usefull for filling out listview objects
         ArrayAdapter<String> adp = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,songNames)
         {
@@ -61,41 +58,43 @@ public class playlist extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent playerIntent = new Intent(playlist.this, player.class);
-                playerIntent.putExtra("SELECTED_SONG_URI_STRING",songUris);
-                playerIntent.putExtra("SELECTED_SONG_NAME",songNames);
+                playerIntent = new Intent(playlist.this, player.class);
                 playerIntent.putExtra("INDEX",position);
-                playerIntent.putExtra("COUNT",mySongs.size());
-                startActivity(playerIntent);
+                setResult(RESULT_OK,playerIntent);
+                finish();
 
 
             }
         });
 
-    }
-
-    //TODO: add mp3 and wav files from internal storage !
-    public ArrayList<File> findSongs(File root)
-    {
-        ArrayList<File> all = new ArrayList<File>();
-        File[] files = root.listFiles();
-        for (File singleFile: files)
-        {
-            if(singleFile.isDirectory() && !singleFile.isHidden())
-            {
-                all.addAll(findSongs(singleFile));
+        /*
+        test = (Button)findViewById(R.id.button);
+        test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(playerIntent!=null)
+                    playerIntent = new Intent(playlist.this, player.class);
+                playerIntent.putExtra("SELECTED_SONG_URI_STRING",songUris);
+                playerIntent.putExtra("SELECTED_SONG_NAME",songNames);
+                playerIntent.putExtra("INDEX",pos);
+                playerIntent.putExtra("COUNT",mySongs.size());
+                    startActivity(playerIntent);
             }
-            else
-            {
-                if(singleFile.getName().endsWith(".wav") || singleFile.getName().endsWith(".mp3"))
-                {
-                    all.add(singleFile);
-                }
-            }
-        }
-        return all;
+        });
+        */
 
     }
+
+
+    /*
+     Bundle extras = getIntent().getExtras();
+        songCount = extras.getInt("COUNT");
+        songIndex = extras.getInt("INDEX");
+        songUris = new String[songCount];
+        songNames = new String[songCount];
+        songUris= extras.getStringArray("SELECTED_SONG_URI_STRING");
+        songNames = extras.getStringArray("SELECTED_SONG_NAME");
+     */
 
 
 

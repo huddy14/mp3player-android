@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Random;
 
 
@@ -52,7 +55,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         startService(IMusicService);
         bindService(IMusicService, MusicServiceConnection, Context.BIND_AUTO_CREATE);
     }
-
+    //TODO: dont start the player with music on, same goes for next, previous buttons if paused music shouldnt be playing
     private ServiceConnection MusicServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -210,14 +213,38 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
 
     private void setVariables()
     {
-        Bundle extras = getIntent().getExtras();
-        songCount = extras.getInt("COUNT");
-        songIndex = extras.getInt("INDEX");
-        songUris = new String[songCount];
-        songNames = new String[songCount];
-        songUris= extras.getStringArray("SELECTED_SONG_URI_STRING");
-        songNames = extras.getStringArray("SELECTED_SONG_NAME");
+        final ArrayList<File> mySongs;
+        mySongs = findSongs(Environment.getExternalStorageDirectory());
+        songNames = new String[ mySongs.size() ];
+        songUris = new String[ mySongs.size() ];
+        songCount = mySongs.size();
+        for(int i=0;i<mySongs.size();i++)
+        {
+            songNames[i] = mySongs.get(i).getName().toString();
+            songUris[i] = mySongs.get(i).getAbsolutePath();
+        }
 
+    }
+
+    /**
+     * here we wait for playlist to send us back index
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1)
+            if(resultCode==RESULT_OK)
+            {
+                songIndex = data.getIntExtra("INDEX",1);
+                if(mpServiceBound)
+                {
+                    musicService.getSong(songUris[songIndex]);
+                    updateTextViews();
+                }
+            }
     }
 
     /**
@@ -225,7 +252,8 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
      */
     private void startPlaylistActivity() {
         Intent Iplaylist = new Intent(player.this, playlist.class);
-        startActivity(Iplaylist);
+        Iplaylist.putExtra("SONGNAMES",songNames);
+        startActivityForResult(Iplaylist, 1);
 
     }
 
@@ -291,6 +319,29 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     private int getRandomIndex()
     {
         return rand.nextInt(songCount);
+
+    }
+
+    //TODO: add mp3 and wav files from internal storage !
+    public ArrayList<File> findSongs(File root)
+    {
+        ArrayList<File> all = new ArrayList<File>();
+        File[] files = root.listFiles();
+        for (File singleFile: files)
+        {
+            if(singleFile.isDirectory() && !singleFile.isHidden())
+            {
+                all.addAll(findSongs(singleFile));
+            }
+            else
+            {
+                if(singleFile.getName().endsWith(".wav") || singleFile.getName().endsWith(".mp3"))
+                {
+                    all.add(singleFile);
+                }
+            }
+        }
+        return all;
 
     }
 }
