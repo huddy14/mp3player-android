@@ -22,12 +22,7 @@ public class playlist extends AppCompatActivity {
 
     ListView lv;
     String[] songNames;
-    String[] songUris;
-    Button test;
     Intent playerIntent;
-    int pos;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,37 +61,5 @@ public class playlist extends AppCompatActivity {
 
             }
         });
-
-        /*
-        test = (Button)findViewById(R.id.button);
-        test.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(playerIntent!=null)
-                    playerIntent = new Intent(playlist.this, player.class);
-                playerIntent.putExtra("SELECTED_SONG_URI_STRING",songUris);
-                playerIntent.putExtra("SELECTED_SONG_NAME",songNames);
-                playerIntent.putExtra("INDEX",pos);
-                playerIntent.putExtra("COUNT",mySongs.size());
-                    startActivity(playerIntent);
-            }
-        });
-        */
-
     }
-
-
-    /*
-     Bundle extras = getIntent().getExtras();
-        songCount = extras.getInt("COUNT");
-        songIndex = extras.getInt("INDEX");
-        songUris = new String[songCount];
-        songNames = new String[songCount];
-        songUris= extras.getStringArray("SELECTED_SONG_URI_STRING");
-        songNames = extras.getStringArray("SELECTED_SONG_NAME");
-     */
-
-
-
-
 }

@@ -24,14 +24,10 @@ public class timer extends CountDownTimer{
      */
 
     private player MyA;
-
     private TextView Counter;
     public timer(player MyA, long millisInFuture, long countDownInterval) {
-        super(millisInFuture, countDownInterval);
+        super(millisInFuture , countDownInterval);
         this.MyA = MyA;
-        //Counter = MyA.getTvSongDuration();
-
-
     }
     /*
     We calculate the textview output for every second till finish
@@ -39,13 +35,13 @@ public class timer extends CountDownTimer{
 
     private String updateCounter(long mUF)
     {
-        //return new String((int)mUF/60000 + (mUF % 600000)/60000 +" : "+(mUF%60000)/10000+(mUF%10000)/1000);
         return new String(TimeUnit.MILLISECONDS.toMinutes(mUF)+" : "+(mUF%60000)/10000+(mUF%10000)/1000);
     }
     @Override
     public void onTick(long millisUntilFinished) {
 
         MyA.getTvSongDuration().setText(updateCounter(millisUntilFinished));
+        MyA.getSeekBar().setProgress(MyA.getSongDuration()-(int)millisUntilFinished);
 
     }
 
