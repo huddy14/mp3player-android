@@ -1,5 +1,7 @@
 package com.example.huddy.mp3player;
-
+/**
+ * TODO: timer shouldnt operate on other activity object, use broadcaster or w/e
+ */
 import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.TextView;

@@ -1,13 +1,15 @@
 /**
- * TODO: move all music-related activities such as next, previous, shuffle etc to mpService so it can all be menaged in background (notification)
- * TODO: create progress bar
- * TODO: internal storage!!!!!
+ * TODO: timer should be implemented here, make function shorter, dont repeat code
  */
 package com.example.huddy.mp3player;
 
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -25,9 +27,10 @@ public class mpService extends Service {
     private int duration,songIndex=0,songCount=0;
     private CallBacks activity = null;
     String songUris[],songNames[];
-    boolean shuffle = false,pause = false;
+    boolean shuffle = false,pause = false,isServiceRuning=false;
     Random rand;
     Notification note;
+    NotificationManager notificationManager;
 
     public mpService() {}
 
@@ -56,17 +59,17 @@ public class mpService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         songUris=intent.getStringArrayExtra("URIS");
+        songNames=intent.getStringArrayExtra("NAMES");
         songCount = songUris.length;
+        isServiceRuning = true;
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        if (mp != null)
-        {
-            mp.stop();
-            mp.release();
-        }
+        mp.stop();
+        mp.release();
+        isServiceRuning = false;
     }
 
     /**
@@ -78,23 +81,20 @@ public class mpService extends Service {
         }
     }
 
+
     public void playSong ()
     {
-        if(mp!=null) {
-            mp.start();
-            pause = false;
-        }
-
+        mp.start();
+        pause = false;
     }
 
     public void pauseSong()
     {
-        if (mp != null)
-            if(mp.isPlaying()) {
-                mp.pause();
-                duration = mp.getCurrentPosition();
-                pause = true;
-            }
+        if(mp.isPlaying()) {
+            mp.pause();
+            duration = mp.getCurrentPosition();
+            pause = true;
+        }
     }
 
     public void stopSong()
@@ -107,34 +107,33 @@ public class mpService extends Service {
     }
     //TODO: make sure all ifs, resets and releases are needed
     public void setSong (String song) {
-        if(mp!=null) {
-            mp.reset();
-            try {
-                mp.setDataSource(this, Uri.parse(song));
-                mp.prepareAsync();
-                mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        duration = mp.getDuration();
-                        mp.start();
-                        if (activity != null) {
-                            activity.updateClient(duration);
-                            //notification();
-                        }
+        mp.reset();
+        try {
+            mp.setDataSource(this, Uri.parse(song));
+            mp.prepareAsync();
+            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    duration = mp.getDuration();
+                    mp.start();
+                    if (activity != null) {
+                        activity.updateClient(duration);
                     }
-                });
-                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        nextSong();
-                        activity.updateIndex(songIndex);
-                    }
-                });
-            //TODO:change it to be more usefull in case of exception
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                }
+            });
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    nextSong();
+                    activity.updateIndex(songIndex);
+                }
+            });
+            currentlyPlayingSongNotification();
         }
+        catch (IOException e) {
+                e.printStackTrace();
+        }
+
 
     }
 
@@ -198,6 +197,11 @@ public class mpService extends Service {
         }
     }
 
+    public int getCurrentSongPosition()
+    {
+        return this.mp.getCurrentPosition();
+    }
+
     public boolean isShuffle()
     {
         return this.shuffle;
@@ -208,6 +212,10 @@ public class mpService extends Service {
         return this.pause;
     }
 
+    public void setSongIndex(int songIndex)
+    {
+        this.songIndex = songIndex;
+    }
 
     public int getDuration() {
         return this.duration;
@@ -222,26 +230,46 @@ public class mpService extends Service {
 
     public void seekTo(int time)
     {
-        if(mp!=null)
+        if(pause) {
+            mp.pause();
+            mp.seekTo(time);
+        }
+        else
         {
-            if(pause) {
-                mp.pause();
-                mp.seekTo(time);
-            }
-            else
-            {
-                mp.pause();
-                mp.seekTo(time);
-                mp.start();
-            }
+            mp.pause();
+            mp.seekTo(time);
+            mp.start();
         }
     }
 
-    public void notification()
+    public void currentlyPlayingSongNotification()
     {
-        //NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-        //mBuilder.setContentTitle("naciskaj");
-        //mBuilder.setContentText(songUris[songIndex]);
+        //NotificationCompat.Action.Builder mActionBuilder = new NotificationCompat.Action.Builder();
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+        mBuilder.setSmallIcon(R.drawable.icon);
+
+        mBuilder.setContentTitle("Currently playing: ");
+        mBuilder.setContentText(songNames[songIndex]);
+        mBuilder.setContentIntent(createPendingIntent());
+        notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1,mBuilder.build());
+
+    }
+
+    private TaskStackBuilder addIntentToTaskStackBuilder()
+    {
+        Intent resultIntent = new Intent(this, player.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(player.class);
+        stackBuilder.addNextIntent(resultIntent);
+        return stackBuilder;
+    }
+
+    private PendingIntent createPendingIntent()
+    {
+        PendingIntent resultPendingIntent = addIntentToTaskStackBuilder().getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        return resultPendingIntent;
+
     }
 
     /**
@@ -251,6 +279,7 @@ public class mpService extends Service {
         void updateClient(long milis);
         //void updateClient(boolean onSongComplition);
         void updateIndex(int i);
+        void updateClient(int songDuration, int songCurrentPosition);
     }
 
     /**
@@ -260,6 +289,8 @@ public class mpService extends Service {
     public void registerCallBacksClient(Activity activity)
     {
         this.activity = (CallBacks)activity;
+        this.activity.updateIndex(songIndex);
+        this.activity.updateClient(getDuration(), getCurrentSongPosition());
     }
 
 

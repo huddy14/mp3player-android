@@ -9,16 +9,16 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Random;
 
+/**
+ * TODO: REFACTOR! implement exceptions
+ */
 
 public class player extends AppCompatActivity implements mpService.CallBacks{
 
@@ -29,32 +29,40 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     TextView tvSongName,tvSongDuration;
     String songUris[],songNames[];
     int songIndex;
-    boolean mpServiceBound = false;
+    boolean isMusicServiceConnected = false;
     mpService musicService;
     Intent IMusicService;
     private timer t;
     long songDuration;
     SeekBar seekBar;
 
-
-
-
+    //TODO: fix it, to many ifs
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        setVariables();
-        if(songUris.length > 0)
-            initializeViewComponents();
+        if(checkIfExternalStorageExists()) {
+            setVariables();
+            if (songUris.length > 0)
+                initializeViewComponents();
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "No music was found on this device \n U may exit",
+                    Toast.LENGTH_LONG).show();
+        }
     }
+
+
 
     @Override
     protected void onStart() {
         super.onStart();
         if(songUris.length > 0){
-            if(musicService == null) {
+            if(!isMusicServiceConnected) {
                 IMusicService = new Intent(this, mpService.class);
                 IMusicService.putExtra("URIS", songUris);
+                IMusicService.putExtra("NAMES", songNames);
                 startService(IMusicService);
                 bindService(IMusicService, MusicServiceConnection, Context.BIND_AUTO_CREATE);
             }
@@ -67,6 +75,14 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
 
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(isMusicServiceConnected)
+            unbindService(MusicServiceConnection);
+    }
+
     //TODO: dont start the player with music on, same goes for next, previous buttons if paused music shouldnt be playing
     private ServiceConnection MusicServiceConnection = new ServiceConnection() {
         @Override
@@ -74,7 +90,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
             if(songUris.length > 0) {
                 mpService.MyBinder myBinder = (mpService.MyBinder) service;
                 musicService = myBinder.getService();
-                mpServiceBound = true;
+                isMusicServiceConnected = true;
                 musicService.registerCallBacksClient(player.this);
                 updateTextViews();
             }
@@ -82,7 +98,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mpServiceBound =false;
+            isMusicServiceConnected =false;
         }
     };
 
@@ -97,17 +113,16 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         btnNext = (ImageButton)findViewById(R.id.buttonNext);
         btnShuffle = (ImageButton)findViewById(R.id.imageButtonShuffle);
         seekBar = (SeekBar)findViewById(R.id.seekBar);
-        //seekBar.setClickable(false);
 
 
         tvSongDuration = (TextView)findViewById(R.id.textViewSongTime);
         tvSongName = (TextView)findViewById(R.id.textViewSongName);
 
-        //....
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser&&mpServiceBound)
+                if(fromUser&&isMusicServiceConnected)
                 {
                     if(t!=null)
                     {
@@ -141,7 +156,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mpServiceBound) {
+                if(isMusicServiceConnected) {
                     if(musicService.isPaused()) {
                         if (t != null) t.start();
                     }
@@ -157,7 +172,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         btnPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mpServiceBound)
+                if(isMusicServiceConnected)
                     musicService.pauseSong();
                 if(t!=null)
                 {
@@ -170,7 +185,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mpServiceBound) {
+                if(isMusicServiceConnected) {
                     musicService.stopSong();
                     startPlaylistActivity();
                 }
@@ -180,7 +195,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mpServiceBound)
+                if(isMusicServiceConnected)
                 {
                     musicService.nextSong();
                 }
@@ -190,7 +205,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         btnPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mpServiceBound)
+                if(isMusicServiceConnected)
                 {
                     musicService.previousSong();
                 }
@@ -217,6 +232,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     private void setVariables()
     {
         final ArrayList<File> mySongs;
+        //adding sound from external storage
         mySongs = findSongs(Environment.getExternalStorageDirectory());
         //mySongs.addAll(findSongs(Environment.getRootDirectory()));
         songNames = new String[ mySongs.size() ];
@@ -230,7 +246,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     }
 
     /**
-     * here we wait for playlist to send us back index
+     * here we wait for playlist to send us back index of song we should play next
      * @param requestCode
      * @param resultCode
      * @param data
@@ -242,8 +258,9 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
             if(resultCode==RESULT_OK)
             {
                 songIndex = data.getIntExtra("INDEX",1);
-                if(mpServiceBound)
+                if(isMusicServiceConnected)
                 {
+                    musicService.setSongIndex(songIndex);
                     musicService.setSong(songUris[songIndex]);
                     updateTextViews();
                 }
@@ -297,16 +314,37 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         updateTextViews();
     }
 
+    @Override
+    public void updateClient(int songDuration, int songCurrentPosition) {
+        if(t!=null) {
+            t.cancel();
+            t = new timer(player.this, songDuration-songCurrentPosition, 10);
+            t.start();
+        }
+        else {
+            t = new timer(player.this, songDuration-songCurrentPosition, 10);
+            t.start();
+        }
+        this.songDuration = songDuration;
+        seekBar.setMax(songDuration);
+    }
+
     public TextView getTvSongDuration()
     {
         return tvSongDuration;
     }
     public SeekBar getSeekBar() { return seekBar;}
 
+    private boolean checkIfExternalStorageExists()
+    {
+        if(Environment.getExternalStorageDirectory() != null)
+            return true;
+        return false;
 
+    }
 
     //TODO: add mp3 and wav files from internal storage !
-    public ArrayList<File> findSongs(File root)
+    private ArrayList<File> findSongs(File root)
     {
         ArrayList<File> all = new ArrayList<File>();
         File[] files = root.listFiles();
