@@ -17,7 +17,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 /**
- * TODO: REFACTOR! implement exceptions
+ * TODO: BROADCAST! songAdapter, songList where to put it!?!?!?!?!?!
  */
 
 public class player extends AppCompatActivity implements mpService.CallBacks{

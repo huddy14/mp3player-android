@@ -1,6 +1,6 @@
 package com.example.huddy.mp3player;
 /**
- * TODO: timer shouldnt operate on other activity object, use broadcaster or w/e
+ * TODO: delete this class, it all has to be implemented as runnable in mpService
  */
 import android.os.CountDownTimer;
 import android.view.View;

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <!-- Artist -->
+    <TextView
+        android:id="@+id/toptext"
+
+        android:layout_width="wrap_content"
+        android:layout_height="26dip"
+
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:textColor="#3F51B5"
+        android:textStyle="bold"
+        android:ellipsize="marquee"
+        />
+    <!-- Duration -->
+    <TextView
+        android:id="@+id/topRightText"
+        android:textColor="#3F51B5"
+        android:layout_width="wrap_content"
+        android:layout_height="26dip"
+
+        android:layout_toRightOf="@id/toptext"
+        android:layout_alignParentRight="true"
+        android:singleLine="true"
+        android:gravity="right"
+        />
+    <!-- Song name -->
+    <TextView
+        android:id="@+id/middletext"
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#3F51B5"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/toptext"
+
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        />
+
+
+</RelativeLayout>
