@@ -16,7 +16,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +30,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
      * Variables
      */
     ImageButton btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious, btnShuffle;
-    TextView tvSongName,tvSongDuration;
+    TextView tvSongName, tvTimeToEnd, tvTimeElapsed;
     ArrayList<song>songList;
     String songTittle[],songAuthor[];
     int songIndex;
@@ -110,16 +110,17 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     private void initializeViewComponents()
     {
         btnGoBack = (ImageButton)findViewById(R.id.buttonBack);
-        btnStart = (ImageButton)findViewById(R.id.buttonStart);
-        btnPause = (ImageButton)findViewById(R.id.buttonPause);
-        btnStop = (ImageButton)findViewById(R.id.buttonStop);
+        btnStart = (ImageButton)findViewById(R.id.imageButtonPlayPause);
+        //btnPause = (ImageButton)findViewById(R.id.buttonPause);
+        //btnStop = (ImageButton)findViewById(R.id.buttonStop);
         btnPrevious = (ImageButton)findViewById(R.id.buttonPrev);
         btnNext = (ImageButton)findViewById(R.id.buttonNext);
-        btnShuffle = (ImageButton)findViewById(R.id.imageButtonShuffle);
+        //btnShuffle = (ImageButton)findViewById(R.id.imageButtonShuffle);
         seekBar = (SeekBar)findViewById(R.id.seekBar);
 
 
-        tvSongDuration = (TextView)findViewById(R.id.textViewSongTime);
+        tvTimeToEnd = (TextView)findViewById(R.id.textViewTimeToEnd);
+        tvTimeElapsed = (TextView)findViewById(R.id.textViewTimeElapsed);
         tvSongName = (TextView)findViewById(R.id.textViewSongName);
 
 
@@ -163,9 +164,19 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
                 if(isMusicServiceConnected) {
                     if(musicService.isPaused()) {
                         if (t != null) t.start();
+                        musicService.playSong();
+                        btnStart.setImageResource(R.drawable.pausebig);
                     }
-                    musicService.playSong();
-
+                    else
+                    {
+                        musicService.pauseSong();
+                        btnStart.setImageResource(R.drawable.playbig);
+                        if(t!=null)
+                        {
+                            t.cancel();
+                            t = new timer(player.this,songDuration-musicService.getDuration(),10);
+                        }
+                    }
                 }
             }
         });
@@ -173,28 +184,28 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
          * Pause button
          *
          */
-        btnPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(isMusicServiceConnected)
-                    musicService.pauseSong();
-                if(t!=null)
-                {
-                    t.cancel();
-                    t = new timer(player.this,songDuration-musicService.getDuration(),10);
-                }
-            }
-        });
-
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(isMusicServiceConnected) {
-                    musicService.stopSong();
-                    startPlaylistActivity();
-                }
-            }
-        });
+//        btnPause.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(isMusicServiceConnected)
+//                    musicService.pauseSong();
+//                if(t!=null)
+//                {
+//                    t.cancel();
+//                    t = new timer(player.this,songDuration-musicService.getDuration(),10);
+//                }
+//            }
+//        });
+//
+//        btnStop.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(isMusicServiceConnected) {
+//                    musicService.stopSong();
+//                    startPlaylistActivity();
+//                }
+//            }
+//        });
 
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,21 +227,21 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
             }
         });
 
-        btnShuffle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(musicService.isShuffle())
-                {
-                    btnShuffle.setImageResource(R.drawable.shuffleoff);
-                    musicService.shuffle();
-                }
-                else
-                {
-                    btnShuffle.setImageResource(R.drawable.shuffleon);
-                    musicService.shuffle();
-                }
-            }
-        });
+//        btnShuffle.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(musicService.isShuffle())
+//                {
+//                    btnShuffle.setImageResource(R.drawable.shuffleoff);
+//                    musicService.shuffle();
+//                }
+//                else
+//                {
+//                    btnShuffle.setImageResource(R.drawable.shuffleon);
+//                    musicService.shuffle();
+//                }
+//            }
+//        });
     }
 
     private void setVariables()
@@ -279,7 +290,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     private void startPlaylistActivity() {
         Intent Iplaylist = new Intent(player.this, playlist.class);
         songDataWrapper dataWraper = new songDataWrapper(songList);
-        Iplaylist.putExtra("SONGLIST",dataWraper);
+        Iplaylist.putExtra("SONGLIST", dataWraper);
         startActivityForResult(Iplaylist, 1);
 
     }
@@ -335,9 +346,13 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         seekBar.setMax(songDuration);
     }
 
-    public TextView getTvSongDuration()
+    public TextView getTvTimeToEnd()
     {
-        return tvSongDuration;
+        return tvTimeToEnd;
+    }
+    public TextView getTvTimeElapsed()
+    {
+        return  this.tvTimeElapsed;
     }
     public SeekBar getSeekBar() { return seekBar;}
 
@@ -389,15 +404,16 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         }
         @Override
         public void onTick(long millisUntilFinished) {
-
-            mPlayer.getTvSongDuration().setText(updateCounter(millisUntilFinished));
+            mPlayer.getTvTimeElapsed().setText(updateCounter(mPlayer.getSongDuration()-(int)millisUntilFinished));
+            mPlayer.getTvTimeToEnd().setText(updateCounter(millisUntilFinished));
             mPlayer.getSeekBar().setProgress(mPlayer.getSongDuration()-(int)millisUntilFinished);
 
         }
 
         @Override
         public void onFinish() {
-            mPlayer.getTvSongDuration().setText("-");
+            mPlayer.getTvTimeToEnd().setText("-");
+            mPlayer.getTvTimeElapsed().setText("");
         }
     }
 }

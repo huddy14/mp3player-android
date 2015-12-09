@@ -46,70 +46,52 @@
             android:layout_weight="2"
             android:textColor="#000000"
             android:textColorHint="#8e4242"
-            android:layout_marginTop="25dp"
             android:gravity="center" />
 
-        <SeekBar
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/seekBar"
-            android:layout_weight="3"
-            android:indeterminate="false"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="20">
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/textViewSongTime"
-            android:layout_gravity="center"
-            android:layout_marginTop="25dp"
-            android:layout_weight="2"
-            android:textColor="#1f3ec4"
-            android:gravity="center" />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/textViewTimeElapsed"
+                android:textAlignment="center"
+                android:layout_weight="5"
+                android:text="aa"
+                android:gravity="center" />
+
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/seekBar"
+                android:layout_weight="1"
+                android:indeterminate="false"
+                android:theme="@style/AppTheme" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/textViewTimeToEnd"
+                android:layout_weight="5"
+                android:textAlignment="gravity"
+                android:text="aa"
+                android:gravity="center" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="1">
-
-            <ImageButton
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="STOP"
-                android:id="@+id/buttonStop"
-                android:src="@drawable/stopbig"
-                android:layout_weight="1"
-                android:background="#ffffff" />
-
-            <ImageButton
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="START"
-                android:id="@+id/buttonStart"
-                android:src="@drawable/playbig"
-                android:layout_weight="1"
-                android:background="#ffffff" />
-
-            <ImageButton
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="PAUSE"
-                android:id="@+id/buttonPause"
-                android:src="@drawable/pausebig"
-                android:layout_weight="1"
-                android:background="#ffffff" />
-        </LinearLayout>
+        android:layout_weight="2"
+        android:background="#14dfce">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -124,15 +106,15 @@
                 android:id="@+id/buttonPrev"
                 android:src="@drawable/backward"
                 android:layout_weight="1"
-                android:background="#ffffff" />
+                android:background="#ad374544" />
 
             <ImageButton
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:id="@+id/imageButtonShuffle"
+                android:id="@+id/imageButtonPlayPause"
                 android:layout_weight="1"
-                android:src="@drawable/shuffleoff"
-                android:background="#ffffff" />
+                android:src="@drawable/play"
+                android:background="#ad374544" />
 
             <ImageButton
                 android:layout_width="fill_parent"
@@ -141,7 +123,7 @@
                 android:id="@+id/buttonNext"
                 android:src="@drawable/forward"
                 android:layout_weight="1"
-                android:background="#ffffff" />
+                android:background="#ad374544" />
         </LinearLayout>
     </LinearLayout>
 

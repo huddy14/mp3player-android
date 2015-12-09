@@ -28,7 +28,7 @@ public class mpService extends Service {
     private int duration,songIndex=0,songCount=0;
     private CallBacks activity = null;
     //String songUris[],songNames[];
-    boolean shuffle = false,pause = false,isServiceRuning=false;
+    boolean shuffle = false,pause = true,isServiceRuning=false;
     Random rand;
     Notification note;
     NotificationManager notificationManager;
@@ -38,7 +38,7 @@ public class mpService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        //setSong(songUris[songIndex]);
+        setSong(songList.get(songIndex).getPath());
         return mpBinder;
     }
 
@@ -117,9 +117,11 @@ public class mpService extends Service {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     duration = mp.getDuration();
-                    mp.start();
-                    if (activity != null) {
-                        activity.updateClient(duration);
+                    if(!pause) {
+                        mp.start();
+                        if (activity != null) {
+                            activity.updateClient(duration);
+                        }
                     }
                 }
             });

@@ -3,7 +3,6 @@ package com.example.huddy.mp3player;
  * TODO: delete this class, it all has to be implemented as runnable in mpService
  */
 import android.os.CountDownTimer;
-import android.view.View;
 import android.widget.TextView;
 
 import java.util.concurrent.TimeUnit;
@@ -42,14 +41,14 @@ public class timer extends CountDownTimer{
     @Override
     public void onTick(long millisUntilFinished) {
 
-        MyA.getTvSongDuration().setText(updateCounter(millisUntilFinished));
+        MyA.getTvTimeToEnd().setText(updateCounter(millisUntilFinished));
         MyA.getSeekBar().setProgress(MyA.getSongDuration()-(int)millisUntilFinished);
 
     }
 
     @Override
     public void onFinish() {
-        MyA.getTvSongDuration().setText("-");
+        MyA.getTvTimeToEnd().setText("-");
 
 
     }
