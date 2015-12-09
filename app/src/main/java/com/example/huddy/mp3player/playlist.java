@@ -36,6 +36,7 @@ public class playlist extends AppCompatActivity implements SearchView.OnQueryTex
     String[] songNames;
     Intent playerIntent;
     songAdapter songAdapter;
+    ArrayList<song>songList;
     //private SearchView searchView;
     private MenuItem searchMenuItem;
 
@@ -48,17 +49,11 @@ public class playlist extends AppCompatActivity implements SearchView.OnQueryTex
 
 
         Bundle extras = getIntent().getExtras();
-        //songNames = extras.getStringArray("SONGNAMES");
+        songDataWrapper dw = (songDataWrapper)getIntent().getSerializableExtra("SONGLIST");
+        songList = dw.getSongList();
         lv = (ListView) findViewById(R.id.PlayList);
 
-        ArrayList<song> songList = new ArrayList<>();
-        Cursor cursor = populateGetSongQueries(this);
-        if(cursor!=null)
-        {
-            cursor.moveToFirst();
-            while(cursor.moveToNext())
-                songList.add(new song(cursor));
-        }
+
         //int i=0;
         songNames = new String[songList.size()];
         for(int i=0;i<songList.size();i++)
@@ -73,8 +68,9 @@ public class playlist extends AppCompatActivity implements SearchView.OnQueryTex
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 playerIntent = new Intent(playlist.this, player.class);
-                playerIntent.putExtra("INDEX",position);
-                setResult(RESULT_OK,playerIntent);
+                Object s =  parent.getAdapter().getItem(position);
+                playerIntent.putExtra("ID", ((song) s).getId());
+                setResult(RESULT_OK, playerIntent);
                 finish();
 
 
@@ -98,28 +94,7 @@ public class playlist extends AppCompatActivity implements SearchView.OnQueryTex
 
 
     }
-    public Cursor populateGetSongQueries(Context context) {
 
-        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
-
-        String[] projection = {
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.DATA,    // filepath of the audio file
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media._ID,     // context id/ uri id of the file
-        };
-
-        Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                selection,
-                null,
-                MediaStore.Audio.Media.TITLE);
-
-        // the last parameter sorts the data alphanumerically
-
-        return cursor;
-    }
 
 
     @Override

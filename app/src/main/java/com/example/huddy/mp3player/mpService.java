@@ -18,6 +18,7 @@ import android.os.Binder;
 import android.support.v4.app.NotificationCompat;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class mpService extends Service {
@@ -26,17 +27,18 @@ public class mpService extends Service {
     private IBinder mpBinder = new MyBinder();
     private int duration,songIndex=0,songCount=0;
     private CallBacks activity = null;
-    String songUris[],songNames[];
+    //String songUris[],songNames[];
     boolean shuffle = false,pause = false,isServiceRuning=false;
     Random rand;
     Notification note;
     NotificationManager notificationManager;
+    ArrayList<song>songList;
 
     public mpService() {}
 
     @Override
     public IBinder onBind(Intent intent) {
-        setSong(songUris[songIndex]);
+        //setSong(songUris[songIndex]);
         return mpBinder;
     }
 
@@ -58,9 +60,9 @@ public class mpService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        songUris=intent.getStringArrayExtra("URIS");
-        songNames=intent.getStringArrayExtra("NAMES");
-        songCount = songUris.length;
+        songDataWrapper dw = (songDataWrapper)intent.getSerializableExtra("SONGLIST");
+        songList = dw.getSongList();
+        songCount = songList.size();
         isServiceRuning = true;
         return START_NOT_STICKY;
     }
@@ -131,7 +133,7 @@ public class mpService extends Service {
             currentlyPlayingSongNotification();
         }
         catch (IOException e) {
-                e.printStackTrace();
+            e.printStackTrace();
         }
 
 
@@ -143,19 +145,19 @@ public class mpService extends Service {
             //making sure index will remain in range
             if (songIndex == songCount - 1) {
                 songIndex = 0;
-                setSong(songUris[songIndex]);
+                setSong(songList.get(songIndex).getPath());
                 activity.updateIndex(songIndex);
 
             } else {
                 songIndex++;
-                setSong(songUris[songIndex]);
+                setSong(songList.get(songIndex).getPath());
                 activity.updateIndex(songIndex);
             }
         }
         else
         {
             songIndex = getRandomIndex();
-            setSong(songUris[songIndex]);
+            setSong(songList.get(songIndex).getPath());
             activity.updateIndex(songIndex);
         }
     }
@@ -166,12 +168,12 @@ public class mpService extends Service {
             //making sure index will remain in range
             if (songIndex == 0) {
                 songIndex = songCount-1;
-                setSong(songUris[songIndex]);
+                setSong(songList.get(songIndex).getPath());
                 activity.updateIndex(songIndex);
                 //updateTextViews();
             } else {
                 songIndex--;
-                setSong(songUris[songIndex]);
+                setSong(songList.get(songIndex).getPath());
                 activity.updateIndex(songIndex);
                 //updateTextViews();
             }
@@ -179,7 +181,7 @@ public class mpService extends Service {
         else
         {
             songIndex = getRandomIndex();
-            setSong(songUris[songIndex]);
+            setSong(songList.get(songIndex).getPath());
             activity.updateIndex(songIndex);
         }
     }
@@ -249,7 +251,7 @@ public class mpService extends Service {
         mBuilder.setSmallIcon(R.drawable.icon);
 
         mBuilder.setContentTitle("Currently playing: ");
-        mBuilder.setContentText(songNames[songIndex]);
+        mBuilder.setContentText(songList.get(songIndex).getAuthor() + "\n" + songList.get(songIndex).getTitle());
         mBuilder.setContentIntent(createPendingIntent());
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1,mBuilder.build());

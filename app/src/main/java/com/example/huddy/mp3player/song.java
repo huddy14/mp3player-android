@@ -3,10 +3,12 @@ package com.example.huddy.mp3player;
 
 import android.database.Cursor;
 
+import java.io.Serializable;
+
 /**
  * Created by huddy on 12/2/15.
  */
-public class song {
+public class song implements Serializable{
     private String title,author,path,id,duration;
 
     public song(Cursor songCursor)

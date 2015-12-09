@@ -4,8 +4,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * TODO: BROADCAST! songAdapter, songList where to put it!?!?!?!?!?!
@@ -27,7 +31,8 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
      */
     ImageButton btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious, btnShuffle;
     TextView tvSongName,tvSongDuration;
-    String songUris[],songNames[];
+    ArrayList<song>songList;
+    String songTittle[],songAuthor[];
     int songIndex;
     boolean isMusicServiceConnected = false;
     mpService musicService;
@@ -43,7 +48,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         setContentView(R.layout.activity_player);
         if(checkIfExternalStorageExists()) {
             setVariables();
-            if (songUris.length > 0)
+            if (songList.size() > 0)
                 initializeViewComponents();
         }
         else
@@ -58,11 +63,10 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     @Override
     protected void onStart() {
         super.onStart();
-        if(songUris.length > 0){
+        if(songList.size() > 0){
             if(!isMusicServiceConnected) {
                 IMusicService = new Intent(this, mpService.class);
-                IMusicService.putExtra("URIS", songUris);
-                IMusicService.putExtra("NAMES", songNames);
+                IMusicService.putExtra("SONGLIST", new songDataWrapper(songList));
                 startService(IMusicService);
                 bindService(IMusicService, MusicServiceConnection, Context.BIND_AUTO_CREATE);
             }
@@ -87,7 +91,7 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
     private ServiceConnection MusicServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if(songUris.length > 0) {
+            if(songList.size() > 0) {
                 mpService.MyBinder myBinder = (mpService.MyBinder) service;
                 musicService = myBinder.getService();
                 isMusicServiceConnected = true;
@@ -137,12 +141,12 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                    //musicService.previousSong();
+                //musicService.previousSong();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                   // musicService.nextSong();
+                // musicService.nextSong();
             }
         });
         btnGoBack.setOnClickListener(new View.OnClickListener() {
@@ -231,18 +235,14 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
 
     private void setVariables()
     {
-        final ArrayList<File> mySongs;
-        //adding sound from external storage
-        mySongs = findSongs(Environment.getExternalStorageDirectory());
-        //mySongs.addAll(findSongs(Environment.getRootDirectory()));
-        songNames = new String[ mySongs.size() ];
-        songUris = new String[ mySongs.size() ];
-        for(int i=0;i<mySongs.size();i++)
+        songList = new ArrayList<>();
+        Cursor cursor = populateSongQueries(this);
+        if(cursor!=null)
         {
-            songNames[i] = mySongs.get(i).getName().toString();
-            songUris[i] = mySongs.get(i).getAbsolutePath();
+            cursor.moveToFirst();
+            while(cursor.moveToNext())
+                songList.add(new song(cursor));
         }
-
     }
 
     /**
@@ -257,11 +257,16 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
         if(requestCode==1)
             if(resultCode==RESULT_OK)
             {
-                songIndex = data.getIntExtra("INDEX",1);
+                String str = data.getStringExtra("ID");
+                for( song s : songList) {
+                    if (str.equals(s.getId())) {
+                        songIndex = songList.indexOf(s);
+                    }
+                }
                 if(isMusicServiceConnected)
                 {
                     musicService.setSongIndex(songIndex);
-                    musicService.setSong(songUris[songIndex]);
+                    musicService.setSong(songList.get(songIndex).getPath());
                     updateTextViews();
                 }
             }
@@ -273,14 +278,15 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
      */
     private void startPlaylistActivity() {
         Intent Iplaylist = new Intent(player.this, playlist.class);
-        Iplaylist.putExtra("SONGNAMES",songNames);
+        songDataWrapper dataWraper = new songDataWrapper(songList);
+        Iplaylist.putExtra("SONGLIST",dataWraper);
         startActivityForResult(Iplaylist, 1);
 
     }
 
     private void updateTextViews()
     {
-        tvSongName.setText(songIndex + 1 + ". " + songNames[songIndex]);
+        tvSongName.setText(songList.get(songIndex).getAuthor() + "\n" + songList.get(songIndex).getTitle());
 
     }
 
@@ -343,26 +349,55 @@ public class player extends AppCompatActivity implements mpService.CallBacks{
 
     }
 
-    //TODO: add mp3 and wav files from internal storage !
-    private ArrayList<File> findSongs(File root)
-    {
-        ArrayList<File> all = new ArrayList<File>();
-        File[] files = root.listFiles();
-        for (File singleFile: files)
-        {
-            if(singleFile.isDirectory() && !singleFile.isHidden())
-            {
-                all.addAll(findSongs(singleFile));
-            }
-            else
-            {
-                if(singleFile.getName().endsWith(".wav") || singleFile.getName().endsWith(".mp3"))
-                {
-                    all.add(singleFile);
-                }
-            }
-        }
-        return all;
+    private Cursor populateSongQueries(Context context) {
 
+        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+
+        String[] projection = {
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.DATA,    // filepath of the audio file
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media._ID,     // context id/ uri id of the file
+        };
+
+        Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                null,
+                MediaStore.Audio.Media.TITLE);
+
+        // the last parameter sorts the data alphanumerically
+
+        return cursor;
+    }
+
+    /**
+     * Created by Student on 2015-11-04.
+     */
+    private class timer extends CountDownTimer {
+
+        private player mPlayer;
+        public timer(player mPlayer, long songDuration, long countDownInterval) {
+            super(songDuration , countDownInterval);
+            this.mPlayer = mPlayer;
+        }
+
+        private String updateCounter(long mUF)
+        {
+            return new String(TimeUnit.MILLISECONDS.toMinutes(mUF)+" : "+(mUF%60000)/10000+(mUF%10000)/1000);
+        }
+        @Override
+        public void onTick(long millisUntilFinished) {
+
+            mPlayer.getTvSongDuration().setText(updateCounter(millisUntilFinished));
+            mPlayer.getSeekBar().setProgress(mPlayer.getSongDuration()-(int)millisUntilFinished);
+
+        }
+
+        @Override
+        public void onFinish() {
+            mPlayer.getTvSongDuration().setText("-");
+        }
     }
 }

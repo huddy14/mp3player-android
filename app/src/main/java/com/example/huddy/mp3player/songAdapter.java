@@ -70,6 +70,11 @@ public class songAdapter extends ArrayAdapter<song> implements Filterable {
     }
 
     @Override
+    public song getItem(int position) {
+        return songList.get(position);
+    }
+
+    @Override
     public Filter getFilter() {
         if(songFilter == null)
             songFilter = new SongFilter();
@@ -83,6 +88,7 @@ public class songAdapter extends ArrayAdapter<song> implements Filterable {
             FilterResults results = new FilterResults();
             if(constraint == null || constraint.length() == 0)
             {
+                songList = originalSongList;
                 results.values = originalSongList;
                 results.count = originalSongList.size();
             }
