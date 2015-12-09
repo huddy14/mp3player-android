@@ -16,13 +16,13 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class playlist extends AppCompatActivity implements SearchView.OnQueryTextListener{
+public class PlaylistActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
 
     ListView lv;
     String[] songNames;
     Intent playerIntent;
-    songAdapter songAdapter;
-    ArrayList<song>songList;
+    SongAdapter songAdapter;
+    ArrayList<Song>songList;
     //private SearchView searchView;
     private MenuItem searchMenuItem;
 
@@ -35,7 +35,7 @@ public class playlist extends AppCompatActivity implements SearchView.OnQueryTex
 
 
         Bundle extras = getIntent().getExtras();
-        songDataWrapper dw = (songDataWrapper)getIntent().getSerializableExtra("SONGLIST");
+        SongDataWrapper dw = (SongDataWrapper)getIntent().getSerializableExtra("SONGLIST");
         songList = dw.getSongList();
         lv = (ListView) findViewById(R.id.PlayList);
 
@@ -47,15 +47,15 @@ public class playlist extends AppCompatActivity implements SearchView.OnQueryTex
             songNames[i] = songList.get(i).getTitle();
         }
         //adapter is usefull for filling out listview objects
-        songAdapter = new songAdapter(getApplicationContext(),R.layout.song_list_item,songList);
+        songAdapter = new SongAdapter(getApplicationContext(),R.layout.song_list_item,songList);
         lv.setAdapter(songAdapter);
         //TODO: consider changing raw strings to constans delcared in a file
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                playerIntent = new Intent(playlist.this, player.class);
+                playerIntent = new Intent(PlaylistActivity.this, PlayerActivity.class);
                 Object s =  parent.getAdapter().getItem(position);
-                playerIntent.putExtra("ID", ((song) s).getId());
+                playerIntent.putExtra("ID", ((Song) s).getId());
                 setResult(RESULT_OK, playerIntent);
                 finish();
 

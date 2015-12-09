@@ -10,18 +10,17 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by huddy on 12/2/15.
  */
-public class songAdapter extends ArrayAdapter<song> implements Filterable {
-    ArrayList<song> songList;
-    final ArrayList<song> originalSongList;
+public class SongAdapter extends ArrayAdapter<Song> implements Filterable {
+    ArrayList<Song> songList;
+    final ArrayList<Song> originalSongList;
     SongFilter songFilter;
 
-    public songAdapter(Context context, int textViewResourceId, ArrayList<song> objects) {
+    public SongAdapter(Context context, int textViewResourceId, ArrayList<Song> objects) {
         super(context, textViewResourceId, objects);
         this.songList = objects;
         this.originalSongList = objects;
@@ -34,15 +33,15 @@ public class songAdapter extends ArrayAdapter<song> implements Filterable {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.song_list_item, null);
         }
-        song s = songList.get(position);
+        Song s = songList.get(position);
 
         if (s != null) {
 
             // This is how you obtain a reference to the TextViews.
             // These TextViews are created in the XML files we defined.
 
-            TextView Author = (TextView) view.findViewById(R.id.toptext);
-            TextView Tittle = (TextView) view.findViewById(R.id.middletext);
+            TextView Author = (TextView) view.findViewById(R.id.middletext);
+            TextView Tittle = (TextView) view.findViewById(R.id.toptext);
             TextView Duration = (TextView) view.findViewById(R.id.topRightText);
 
             // check to see if each individual textview is null.
@@ -70,7 +69,7 @@ public class songAdapter extends ArrayAdapter<song> implements Filterable {
     }
 
     @Override
-    public song getItem(int position) {
+    public Song getItem(int position) {
         return songList.get(position);
     }
 
@@ -94,9 +93,9 @@ public class songAdapter extends ArrayAdapter<song> implements Filterable {
             }
             else
             {
-                ArrayList<song> filteredSong = new ArrayList<>();
+                ArrayList<Song> filteredSong = new ArrayList<>();
 
-                for(song s : originalSongList)
+                for(Song s : originalSongList)
                 {
                     if(s.getTitle().toUpperCase().startsWith(constraint.toString().toUpperCase()) ||
                             s.getAuthor().toUpperCase().startsWith(constraint.toString().toUpperCase()))
@@ -114,7 +113,7 @@ public class songAdapter extends ArrayAdapter<song> implements Filterable {
             if(results.count == 0)
                 notifyDataSetInvalidated();
             else{
-                songList = (ArrayList<song>)results.values;
+                songList = (ArrayList<Song>)results.values;
                 notifyDataSetChanged();
             }
 

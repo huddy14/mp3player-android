@@ -2,16 +2,18 @@ package com.example.huddy.mp3player;
 
 
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 
 import java.io.Serializable;
 
 /**
  * Created by huddy on 12/2/15.
  */
-public class song implements Serializable{
+public class Song implements Serializable{
     private String title,author,path,id,duration;
-
-    public song(Cursor songCursor)
+    public Song(Cursor songCursor)
     {
         title = songCursor.getString(0);
         author = songCursor.getString(1);
@@ -39,5 +41,22 @@ public class song implements Serializable{
     public String getDuration()
     {
         return this.duration;
+    }
+
+    public Bitmap getCover()
+    {
+        byte[]coverPic;
+        Bitmap cover;
+        MediaMetadataRetriever mMetadataRetriver = new MediaMetadataRetriever();
+        try
+        {
+            mMetadataRetriver.setDataSource(this.path);
+            coverPic = mMetadataRetriver.getEmbeddedPicture();
+            return BitmapFactory.decodeByteArray(coverPic,0,coverPic.length);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 }

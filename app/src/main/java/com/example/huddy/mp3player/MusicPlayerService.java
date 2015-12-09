@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class mpService extends Service {
+public class MusicPlayerService extends Service {
 
     private MediaPlayer mp = new MediaPlayer();
     private IBinder mpBinder = new MyBinder();
@@ -32,9 +32,9 @@ public class mpService extends Service {
     Random rand;
     Notification note;
     NotificationManager notificationManager;
-    ArrayList<song>songList;
+    ArrayList<Song>songList;
 
-    public mpService() {}
+    public MusicPlayerService() {}
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -51,7 +51,7 @@ public class mpService extends Service {
 
     /**
      * this function is loaded only once, when the service starts
-     * we get songs uris from player class and service is set to START_NOT_STICKY
+     * we get songs uris from PlayerActivity class and service is set to START_NOT_STICKY
      * which means it wont reload when crushed
      * @param intent
      * @param flags
@@ -60,7 +60,7 @@ public class mpService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        songDataWrapper dw = (songDataWrapper)intent.getSerializableExtra("SONGLIST");
+        SongDataWrapper dw = (SongDataWrapper)intent.getSerializableExtra("SONGLIST");
         songList = dw.getSongList();
         songCount = songList.size();
         isServiceRuning = true;
@@ -78,8 +78,8 @@ public class mpService extends Service {
      * this snippet is used to bound together activity and this service
      */
     public class MyBinder extends Binder {
-        mpService getService() {
-            return mpService.this;
+        MusicPlayerService getService() {
+            return MusicPlayerService.this;
         }
     }
 
@@ -94,7 +94,6 @@ public class mpService extends Service {
     {
         if(mp.isPlaying()) {
             mp.pause();
-            duration = mp.getCurrentPosition();
             pause = true;
         }
     }
@@ -106,6 +105,11 @@ public class mpService extends Service {
             mp.reset();
             //mp = null;
         }
+    }
+
+    public boolean isPlaying()
+    {
+        return this.mp.isPlaying();
     }
     //TODO: make sure all ifs, resets and releases are needed
     public void setSong (String song) {
@@ -119,10 +123,9 @@ public class mpService extends Service {
                     duration = mp.getDuration();
                     if(!pause) {
                         mp.start();
-                        if (activity != null) {
-                            activity.updateClient(duration);
-                        }
                     }
+                    if(activity!=null)
+                        activity.seekBarUpdatePossible();
                 }
             });
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -225,6 +228,10 @@ public class mpService extends Service {
         return this.duration;
 
     }
+    public int getCurrentPosition()
+    {
+        return this.mp.getCurrentPosition();
+    }
 
     private int getRandomIndex()
     {
@@ -234,21 +241,11 @@ public class mpService extends Service {
 
     public void seekTo(int time)
     {
-        if(pause) {
-            mp.pause();
-            mp.seekTo(time);
-        }
-        else
-        {
-            mp.pause();
-            mp.seekTo(time);
-            mp.start();
-        }
+        mp.seekTo(time);
     }
 
     public void currentlyPlayingSongNotification()
     {
-        //NotificationCompat.Action.Builder mActionBuilder = new NotificationCompat.Action.Builder();
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
         mBuilder.setSmallIcon(R.drawable.icon);
 
@@ -262,9 +259,9 @@ public class mpService extends Service {
 
     private TaskStackBuilder addIntentToTaskStackBuilder()
     {
-        Intent resultIntent = new Intent(this, player.class);
+        Intent resultIntent = new Intent(this, PlayerActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(player.class);
+        stackBuilder.addParentStack(PlayerActivity.class);
         stackBuilder.addNextIntent(resultIntent);
         return stackBuilder;
     }
@@ -280,10 +277,8 @@ public class mpService extends Service {
      * interfaces created to communicate with activities
      */
     public interface CallBacks{
-        void updateClient(long milis);
-        //void updateClient(boolean onSongComplition);
         void updateIndex(int i);
-        void updateClient(int songDuration, int songCurrentPosition);
+        void seekBarUpdatePossible();
     }
 
     /**
@@ -294,8 +289,5 @@ public class mpService extends Service {
     {
         this.activity = (CallBacks)activity;
         this.activity.updateIndex(songIndex);
-        this.activity.updateClient(getDuration(), getCurrentSongPosition());
     }
-
-
 }
