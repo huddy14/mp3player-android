@@ -88,6 +88,7 @@ public class MusicPlayerService extends Service {
     {
         mp.start();
         pause = false;
+        tryUpdatePlayPauseButton(true);
     }
 
     public void pauseSong()
@@ -95,6 +96,7 @@ public class MusicPlayerService extends Service {
         if(mp.isPlaying()) {
             mp.pause();
             pause = true;
+            tryUpdatePlayPauseButton(false);
         }
     }
 
@@ -204,11 +206,6 @@ public class MusicPlayerService extends Service {
         }
     }
 
-    public int getCurrentSongPosition()
-    {
-        return this.mp.getCurrentPosition();
-    }
-
     public boolean isShuffle()
     {
         return this.shuffle;
@@ -244,6 +241,11 @@ public class MusicPlayerService extends Service {
         mp.seekTo(time);
     }
 
+    private void tryUpdatePlayPauseButton(boolean isPlaying)
+    {
+        if(activity!=null)
+            activity.updatePlayPauseButton(isPlaying);
+    }
     public void currentlyPlayingSongNotification()
     {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
@@ -279,6 +281,7 @@ public class MusicPlayerService extends Service {
     public interface CallBacks{
         void updateIndex(int i);
         void seekBarUpdatePossible();
+        void updatePlayPauseButton(boolean isPlaying);
     }
 
     /**
@@ -289,5 +292,6 @@ public class MusicPlayerService extends Service {
     {
         this.activity = (CallBacks)activity;
         this.activity.updateIndex(songIndex);
+        this.activity.updatePlayPauseButton(isPlaying());
     }
 }

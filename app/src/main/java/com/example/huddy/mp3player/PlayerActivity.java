@@ -102,6 +102,7 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         super.onResume();
         mHandler = new Handler();
         mSeekBarUpdater.run();
+        //updatePlayPauseButton();
     }
 
     @Override
@@ -198,10 +199,10 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
                 if (isMusicServiceConnected) {
                     if (musicService.isPaused()) {
                         musicService.playSong();
-                        btnStart.setImageResource(R.drawable.pause);
+                        //btnStart.setImageResource(R.drawable.pause);
                     } else {
                         musicService.pauseSong();
-                        btnStart.setImageResource(R.drawable.play);
+                        //btnStart.setImageResource(R.drawable.play);
                     }
                 }
             }
@@ -301,11 +302,15 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
 
     private void updateImageViewCover() {
         Bitmap cover = songList.get(songIndex).getCover();
-        if(cover != null)
-            //songCover.setImageBitmap(Bitmap.createScaledBitmap(cover, 256, 256, false));
+        if(cover != null) {
             songCover.setImageBitmap(cover);
-        else
+            songCover.setScaleType(ImageView.ScaleType.FIT_XY);
+        }
+
+        else {
             songCover.setImageResource(R.drawable.default_track_icon);
+            songCover.setScaleType(ImageView.ScaleType.CENTER);
+        }
     }
 
     @Override
@@ -320,6 +325,16 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         mHandler = null;
         mHandler = new Handler();
         mSeekBarUpdater.run();
+    }
+
+
+    @Override
+    public void updatePlayPauseButton(boolean isPlaying)
+    {
+        if (isPlaying) {
+            btnStart.setImageResource(R.drawable.pause);
+        } else
+            btnStart.setImageResource(R.drawable.play);
     }
 
     private boolean checkIfExternalStorageExists() {
