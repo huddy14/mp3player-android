@@ -1,36 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:background="#ffffff">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/imageViewCover"
-            android:longClickable="false" />
+            android:longClickable="false"
+            android:background="#000000"
+            android:scaleType="fitXY"
+            android:layout_gravity="top"
+            android:layout_weight="1" />
 
-    </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:background="#000000"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GO BACK"
+                android:id="@+id/buttonBack"
+                android:src="@drawable/search"
+
+                />
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1.6"
-        android:background="#14dfce">
+        android:layout_weight="2"
+        android:background="#3F51B5">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="77dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/textViewArtist"
+            android:focusableInTouchMode="false"
+            android:textColor="#95ffffff"
+            android:gravity="center|left"
+            android:textIsSelectable="false"
+            android:text="sdf"
+            android:longClickable="false" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="ad"
+            android:id="@+id/textViewTittle"
+            android:gravity="center|left"
+            android:textColor="#95ffffff" />
+
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="30dp"
+            android:minHeight="30dp"
+            android:maxHeight="30dp"
+            android:id="@+id/seekBar"
+            android:layout_weight="1"
+            android:indeterminate="false" />
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:background="#3F51B5">
 
             <TextView
                 android:layout_width="fill_parent"
@@ -38,70 +90,19 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:id="@+id/textViewTimeElapsed"
                 android:textAlignment="center"
-                android:gravity="bottom"
-                android:layout_weight="5"
-                android:text="aa"
-                 />
-
-            <SeekBar
-                android:layout_width="fill_parent"
-                android:layout_height="30dp"
-                android:minHeight="30dp"
-                android:maxHeight="30dp"
-                android:layout_gravity="bottom"
-                android:id="@+id/seekBar"
+                android:gravity="center"
                 android:layout_weight="1"
-                android:indeterminate="false"
-                 />
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:id="@+id/textViewTimeToEnd"
-                android:layout_weight="5"
-                android:textAlignment="center"
                 android:text="aa"
-                android:gravity="bottom" />
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/textViewSongName"
-            android:layout_gravity="center"
-            android:focusableInTouchMode="false"
-            android:textColorHighlight="#a69595"
-            android:textColor="#000000"
-            android:textColorHint="#8e4242"
-            android:gravity="center"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1">
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="GO BACK"
-                android:id="@+id/buttonBack"
-                android:src="@drawable/tracklist"
-
-                android:background="#ffffff" />
+                android:textColor="#ffffff" />
 
             <ImageButton
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:text="PREVIOUS"
                 android:id="@+id/buttonPrev"
-                android:src="@drawable/backward"
+                android:src="@drawable/previous"
                 android:layout_weight="1"
-                android:background="#ad374544" />
+                android:background="#3F51B5" />
 
             <ImageButton
                 android:layout_width="fill_parent"
@@ -109,16 +110,27 @@
                 android:id="@+id/imageButtonPlayPause"
                 android:layout_weight="1"
                 android:src="@drawable/play"
-                android:background="#ad374544" />
+                android:background="#3F51B5" />
 
             <ImageButton
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:text="NEXT"
                 android:id="@+id/buttonNext"
-                android:src="@drawable/forward"
+                android:src="@drawable/next"
                 android:layout_weight="1"
-                android:background="#ad374544" />
+                android:background="#3F51B5" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/textViewTimeToEnd"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:text="aa"
+                android:gravity="center"
+                android:textColor="#ffffff" />
         </LinearLayout>
     </LinearLayout>
 

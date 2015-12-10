@@ -7,12 +7,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.IBinder;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -26,7 +23,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import android.os.Handler;
-import java.util.logging.LogRecord;
 
 /**
  * TODO: BROADCAST! SongAdapter, songList where to put it!?!?!?!?!?!
@@ -40,7 +36,7 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
      */
     ImageButton btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious, btnShuffle;
     ImageView songCover;
-    TextView tvSongName, tvTimeToEnd, tvTimeElapsed;
+    TextView tvArtist,tvTittle, tvTimeToEnd, tvTimeElapsed;
     ArrayList<Song> songList;
     int songIndex;
     boolean isMusicServiceConnected = false;
@@ -149,8 +145,9 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         btnNext = (ImageButton) findViewById(R.id.buttonNext);
         //btnShuffle = (ImageButton)findViewById(R.id.imageButtonShuffle);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
+
         songCover = (ImageView)findViewById(R.id.imageViewCover);
-        final GestureDetector gestureDetector = new GestureDetector(new GestureListener(this));
+        final GestureDetector gestureDetector = new GestureDetector(this.getApplicationContext(),new GestureListener(this));
         songCover.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -162,7 +159,8 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
 
         tvTimeToEnd = (TextView) findViewById(R.id.textViewTimeToEnd);
         tvTimeElapsed = (TextView) findViewById(R.id.textViewTimeElapsed);
-        tvSongName = (TextView) findViewById(R.id.textViewSongName);
+        tvArtist = (TextView) findViewById(R.id.textViewArtist);
+        tvTittle = (TextView)findViewById(R.id.textViewTittle);
 
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -200,10 +198,10 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
                 if (isMusicServiceConnected) {
                     if (musicService.isPaused()) {
                         musicService.playSong();
-                        btnStart.setImageResource(R.drawable.pausebig);
+                        btnStart.setImageResource(R.drawable.pause);
                     } else {
                         musicService.pauseSong();
-                        btnStart.setImageResource(R.drawable.playbig);
+                        btnStart.setImageResource(R.drawable.play);
                     }
                 }
             }
@@ -285,7 +283,6 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
             }
     }
 
-
     /**
      * Changing the activity focus to @PlaylistActivity
      */
@@ -294,19 +291,12 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         SongDataWrapper dataWraper = new SongDataWrapper(songList);
         Iplaylist.putExtra("SONGLIST", dataWraper);
         startActivityForResult(Iplaylist, 1);
-
     }
 
     private void updateTextViews() {
-        tvSongName.setText(songList.get(songIndex).getAuthor() + "\n" + songList.get(songIndex).getTitle());
+        tvArtist.setText(songList.get(songIndex).getAuthor());
+        tvTittle.setText(songList.get(songIndex).getTitle());
 
-    }
-
-    @Override
-    public void updateIndex(int i) {
-        this.songIndex = i;
-        updateTextViews();
-        updateImageViewCover();
     }
 
     private void updateImageViewCover() {
@@ -316,8 +306,13 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
             songCover.setImageBitmap(cover);
         else
             songCover.setImageResource(R.drawable.default_track_icon);
+    }
 
-
+    @Override
+    public void updateIndex(int i) {
+        this.songIndex = i;
+        updateTextViews();
+        updateImageViewCover();
     }
 
     @Override
