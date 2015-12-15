@@ -30,12 +30,32 @@
 
             <ImageButton
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:text="GO BACK"
+                android:layout_marginRight="5dp"
                 android:id="@+id/buttonBack"
+                android:background="#A7BFC7"
                 android:src="@drawable/search"
 
                 />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/shuffleoff"
+                android:background="#A7BFC7"
+                android:id="@+id/buttonShuffle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Medium Text"
+                android:id="@+id/textViewIndex"
+                android:textAlignment="gravity"
+                android:singleLine="false"
+                android:gravity="right"
+                android:textColor="#ffff" />
         </LinearLayout>
 
     </RelativeLayout>
@@ -58,7 +78,8 @@
             android:textIsSelectable="false"
             android:text="sdf"
             android:longClickable="false"
-            android:textSize="16dp" />
+            android:textSize="16dp"
+            android:singleLine="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -68,7 +89,8 @@
             android:id="@+id/textViewTittle"
             android:gravity="center|left"
             android:textColor="#ffffff"
-            android:textSize="12dp" />
+            android:textSize="12dp"
+            android:singleLine="true" />
 
         <SeekBar
             android:layout_width="fill_parent"

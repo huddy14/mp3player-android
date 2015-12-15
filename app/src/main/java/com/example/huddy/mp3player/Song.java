@@ -46,7 +46,6 @@ public class Song implements Serializable{
     public Bitmap getCover()
     {
         byte[]coverPic;
-        Bitmap cover;
         MediaMetadataRetriever mMetadataRetriver = new MediaMetadataRetriever();
         try
         {

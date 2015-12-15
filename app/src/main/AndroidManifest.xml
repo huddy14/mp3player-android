@@ -18,10 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlaylistActivity">
-        <meta-data android:name="android.app.searchable"
-            android:resource="@xml/searchable"
-            android:value=".playlist"/>
+        <activity android:name=".PlaylistActivity" >
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"
+                android:value=".playlist" />
         </activity>
 
         <service
@@ -29,6 +30,8 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
+
     </application>
 
 </manifest>

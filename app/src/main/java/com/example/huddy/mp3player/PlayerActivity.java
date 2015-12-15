@@ -28,7 +28,7 @@ import android.os.Handler;
  * TODO: BROADCAST! SongAdapter, songList where to put it!?!?!?!?!?!
  */
 
-public class PlayerActivity extends Activity implements MusicPlayerService.CallBacks {
+public class PlayerActivity extends Activity implements MusicPlayerService.CallBacks,ServiceConnection {
 
 
     /**
@@ -36,7 +36,7 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
      */
     ImageButton btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious, btnShuffle;
     ImageView songCover;
-    TextView tvArtist,tvTittle, tvTimeToEnd, tvTimeElapsed;
+    TextView tvArtist,tvTittle, tvTimeToEnd, tvTimeElapsed,tvIndex;
     ArrayList<Song> songList;
     int songIndex;
     boolean isMusicServiceConnected = false;
@@ -87,7 +87,7 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
                 IMusicService = new Intent(this, MusicPlayerService.class);
                 IMusicService.putExtra("SONGLIST", new SongDataWrapper(songList));
                 startService(IMusicService);
-                bindService(IMusicService, MusicServiceConnection, Context.BIND_AUTO_CREATE);
+                bindService(IMusicService, this, Context.BIND_AUTO_CREATE);
             }
         } else {
             Toast.makeText(getApplicationContext(), "No music was found on this device \n U may exit",
@@ -115,28 +115,9 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
     protected void onDestroy() {
         super.onDestroy();
         if (isMusicServiceConnected)
-            unbindService(MusicServiceConnection);
+            unbindService(this);
     }
 
-    //TODO: dont start the PlayerActivity with music on, same goes for next, previous buttons if paused music shouldnt be playing
-    private ServiceConnection MusicServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (songList.size() > 0) {
-                MusicPlayerService.MyBinder myBinder = (MusicPlayerService.MyBinder) service;
-                musicService = myBinder.getService();
-                isMusicServiceConnected = true;
-                musicService.registerCallBacksClient(PlayerActivity.this);
-                updateTextViews();
-                updateImageViewCover();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isMusicServiceConnected = false;
-        }
-    };
 
 
     private void initializeViewComponents() {
@@ -144,8 +125,9 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         btnStart = (ImageButton) findViewById(R.id.imageButtonPlayPause);
         btnPrevious = (ImageButton) findViewById(R.id.buttonPrev);
         btnNext = (ImageButton) findViewById(R.id.buttonNext);
-        //btnShuffle = (ImageButton)findViewById(R.id.imageButtonShuffle);
+        btnShuffle = (ImageButton)findViewById(R.id.buttonShuffle);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
+
 
         songCover = (ImageView)findViewById(R.id.imageViewCover);
         final GestureDetector gestureDetector = new GestureDetector(this.getApplicationContext(),new GestureListener(this));
@@ -162,6 +144,7 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         tvTimeElapsed = (TextView) findViewById(R.id.textViewTimeElapsed);
         tvArtist = (TextView) findViewById(R.id.textViewArtist);
         tvTittle = (TextView)findViewById(R.id.textViewTittle);
+        tvIndex = (TextView)findViewById(R.id.textViewIndex);
 
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -230,21 +213,13 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
             }
         });
 
-//        btnShuffle.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if(musicService.isShuffle())
-//                {
-//                    btnShuffle.setImageResource(R.drawable.shuffleoff);
-//                    musicService.shuffle();
-//                }
-//                else
-//                {
-//                    btnShuffle.setImageResource(R.drawable.shuffleon);
-//                    musicService.shuffle();
-//                }
-//            }
-//        });
+        btnShuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isMusicServiceConnected)
+                    musicService.shuffle();
+            }
+        });
     }
 
     private void setVariables() {
@@ -297,6 +272,7 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
     private void updateTextViews() {
         tvArtist.setText(songList.get(songIndex).getAuthor());
         tvTittle.setText(songList.get(songIndex).getTitle());
+        tvIndex.setText(songIndex+1 + "/"+songList.size());
 
     }
 
@@ -327,7 +303,14 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         mSeekBarUpdater.run();
     }
 
-
+    @Override
+    public void updateShuffleButton(boolean isShuffle)
+    {
+        if(isShuffle)
+            btnShuffle.setImageResource(R.drawable.shuffleon);
+        else
+            btnShuffle.setImageResource(R.drawable.shuffleoff);
+    }
     @Override
     public void updatePlayPauseButton(boolean isPlaying)
     {
@@ -366,5 +349,23 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         // the last parameter sorts the data alphanumerically
 
         return cursor;
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        if (songList.size() > 0) {
+            MusicPlayerService.MyBinder myBinder = (MusicPlayerService.MyBinder) service;
+            musicService = myBinder.getService();
+            isMusicServiceConnected = true;
+            musicService.registerCallBacksClient(PlayerActivity.this);
+            updateTextViews();
+            updateImageViewCover();
+        }
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        isMusicServiceConnected = false;
+        musicService = null;
     }
 }
