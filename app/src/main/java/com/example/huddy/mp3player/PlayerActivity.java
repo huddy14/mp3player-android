@@ -28,7 +28,7 @@ import android.os.Handler;
  * TODO: BROADCAST! SongAdapter, songList where to put it!?!?!?!?!?!
  */
 
-public class PlayerActivity extends Activity implements MusicPlayerService.CallBacks,ServiceConnection {
+public class PlayerActivity extends Activity implements MusicPlayerService.CallBacksToPlayerActivity,ServiceConnection {
 
 
     /**

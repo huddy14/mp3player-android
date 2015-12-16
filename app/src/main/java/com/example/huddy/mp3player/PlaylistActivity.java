@@ -23,22 +23,16 @@ public class PlaylistActivity extends AppCompatActivity implements SearchView.On
     Intent playerIntent;
     SongAdapter songAdapter;
     ArrayList<Song>songList;
-    //private SearchView searchView;
-    private MenuItem searchMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
-
         //adding search list widget
-
-
         Bundle extras = getIntent().getExtras();
         SongDataWrapper dw = (SongDataWrapper)getIntent().getSerializableExtra("SONGLIST");
         songList = dw.getSongList();
         lv = (ListView) findViewById(R.id.PlayList);
-
 
         //int i=0;
         songNames = new String[songList.size()];
@@ -58,8 +52,6 @@ public class PlaylistActivity extends AppCompatActivity implements SearchView.On
                 playerIntent.putExtra("ID", ((Song) s).getId());
                 setResult(RESULT_OK, playerIntent);
                 finish();
-
-
             }
         });
 
@@ -76,12 +68,7 @@ public class PlaylistActivity extends AppCompatActivity implements SearchView.On
         searchView.setSubmitButtonEnabled(true);
         searchView.setOnQueryTextListener(this);
         return true;
-
-
-
     }
-
-
 
     @Override
     public boolean onQueryTextSubmit(String query) {

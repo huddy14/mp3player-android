@@ -4,41 +4,30 @@
 package com.example.huddy.mp3player;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.app.TaskStackBuilder;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.Binder;
-import android.support.v4.app.NotificationCompat;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class MusicPlayerService extends Service {
-    public final String ACTION_PLAY = "play",ACTION_PAUSE="pause",ACTION_NEXT="next",ACTION_PREVIOUS="previous";
     private MediaPlayer mp = new MediaPlayer();
     private IBinder mpBinder = new MyBinder();
     private int duration,songIndex=0,songCount=0;
-    private CallBacks activity = null;
-    MyReceiver myReceiver;
-    //String songUris[],songNames[];
-    boolean shuffle = false,pause = true,isServiceRuning=false;
-    Random rand;
-    Notification note;
-    NotificationManager notificationManager;
-    ArrayList<Song>songList;
-
-    public MusicPlayerService() {}
+    private CallBacksToPlayerActivity activity = null;
+    private NotificationActionReciever myReceiver;
+    private boolean shuffle = false,pause = true,isServiceRuning=false;
+    private Random rand;
+    private NotificationManager notificationManager;
+    private ArrayList<Song>songList;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -49,8 +38,6 @@ public class MusicPlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-
     }
 
     /**
@@ -65,8 +52,7 @@ public class MusicPlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         SongDataWrapper dw = (SongDataWrapper)intent.getSerializableExtra("SONGLIST");
-        registerReciever();
-        
+        callRegisterReceiver();
         songList = dw.getSongList();
         songCount = songList.size();
         isServiceRuning = true;
@@ -90,12 +76,12 @@ public class MusicPlayerService extends Service {
         }
     }
 
-
     public void playSong ()
     {
         mp.start();
         pause = false;
         tryUpdatePlayPauseButton(true);
+        currentlyPlayingSongNotification();
     }
 
     public void pauseSong()
@@ -104,6 +90,7 @@ public class MusicPlayerService extends Service {
             mp.pause();
             pause = true;
             tryUpdatePlayPauseButton(false);
+            currentlyPlayingSongNotification();
         }
     }
 
@@ -120,7 +107,7 @@ public class MusicPlayerService extends Service {
     {
         return this.mp.isPlaying();
     }
-    //TODO: make sure all ifs, resets and releases are needed
+
     public void setSong (String song) {
         mp.reset();
         try {
@@ -130,11 +117,12 @@ public class MusicPlayerService extends Service {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     duration = mp.getDuration();
-                    if(!pause) {
+                    if (!pause) {
                         mp.start();
                     }
-                    if(activity!=null)
+                    if (activity != null)
                         activity.seekBarUpdatePossible();
+                    currentlyPlayingSongNotification();
                 }
             });
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -144,7 +132,7 @@ public class MusicPlayerService extends Service {
                     activity.updateIndex(songIndex);
                 }
             });
-            currentlyPlayingSongNotification();
+
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -232,6 +220,7 @@ public class MusicPlayerService extends Service {
         return this.duration;
 
     }
+
     public int getCurrentPosition()
     {
         return this.mp.getCurrentPosition();
@@ -240,7 +229,6 @@ public class MusicPlayerService extends Service {
     private int getRandomIndex()
     {
         return rand.nextInt(songCount);
-
     }
 
     public void seekTo(int time)
@@ -253,92 +241,50 @@ public class MusicPlayerService extends Service {
         if(activity!=null)
             activity.updatePlayPauseButton(isPlaying);
     }
+
     public void currentlyPlayingSongNotification()
     {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-        mBuilder.setSmallIcon(R.drawable.icon);
-        try{
-            Bitmap cover = songList.get(songIndex).getCover();
-            int height = (int)getApplicationContext().getResources().getDimension(R.dimen.notification_large_icon_height);
-            int width = (int)getApplicationContext().getResources().getDimension(R.dimen.notification_large_icon_width);
-            cover=cover.createScaledBitmap(cover,height,width,false);
-            mBuilder.setLargeIcon(cover);
-        }
-        catch (Exception e)
-        {
-            //mBuilder.setSmallIcon(R.drawable.icon);
-        }
 
-        PendingIntentHelper mHelper = new PendingIntentHelper(this,this,new Intent(this, PlayerActivity.class));
-        mBuilder.setContentTitle("Currently playing: ")
-                .setContentText(songList.get(songIndex).getAuthor() + "\n" + songList.get(songIndex).getTitle())
-                .setContentIntent(mHelper.createPendingIntent())
-                .addAction(R.drawable.previous, "", mHelper.createActionIntent(ACTION_PREVIOUS))
-                .addAction(R.drawable.play, "", mHelper.createActionIntent(ACTION_PLAY))
-                //.addAction(R.drawable.pause,"",mHelper.createActionIntent(ACTION_PAUSE))
-                .addAction(R.drawable.next, "", mHelper.createActionIntent(ACTION_NEXT))
-                //cant close notification
-                .setOngoing(true);
-        //mBuilder.setDeleteIntent(createPendingIntent());
+        NotificationHelper mHelper = new NotificationHelper(this,this,new Intent(this, PlayerActivity.class));
         notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1,mBuilder.build());
+        notificationManager.notify(1, mHelper.createCurrentSongNotificationBuilder().build());
 
     }
 
+    public Song getCurrentSong()
+    {
+        return songList.get(songIndex);
+    }
 
     /**
      * interfaces created to communicate with activities
      */
-    public interface CallBacks{
+    public interface CallBacksToPlayerActivity {
         void updateIndex(int i);
         void seekBarUpdatePossible();
         void updatePlayPauseButton(boolean isPlaying);
         void updateShuffleButton(boolean isShuffle);
     }
-    private void registerReciever()
+
+    private void callRegisterReceiver()
     {
         //registering MyReciver reference adding action filter
-        myReceiver = new MyReceiver();
-        registerReceiver(myReceiver,new IntentFilter(ACTION_PLAY));
-        registerReceiver(myReceiver,new IntentFilter(ACTION_NEXT));
-        registerReceiver(myReceiver, new IntentFilter(ACTION_PREVIOUS));
-        registerReceiver(myReceiver, new IntentFilter(ACTION_PAUSE));
+        myReceiver = new NotificationActionReciever(this);
+        registerReceiver(myReceiver,new IntentFilter(ActionConstants.ACTION_PLAY));
+        registerReceiver(myReceiver,new IntentFilter(ActionConstants.ACTION_NEXT));
+        registerReceiver(myReceiver, new IntentFilter(ActionConstants.ACTION_PREVIOUS));
+        registerReceiver(myReceiver, new IntentFilter(ActionConstants.ACTION_PAUSE));
+        registerReceiver(myReceiver, new IntentFilter(ActionConstants.ACTION_EXIT));
     }
+
     /**
      * all activities have to be registred
      * @param activity
      */
     public void registerCallBacksClient(Activity activity)
     {
-        this.activity = (CallBacks)activity;
+        this.activity = (CallBacksToPlayerActivity)activity;
         this.activity.updateIndex(songIndex);
         this.activity.updatePlayPauseButton(isPlaying());
-    }
-
-    public class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            switch (action) {
-                case ACTION_PLAY:
-                    if(MusicPlayerService.this.isPlaying())
-                        MusicPlayerService.this.pauseSong();
-                    else MusicPlayerService.this.playSong();
-                    break;
-                case ACTION_NEXT:
-                    try {
-                        MusicPlayerService.this.nextSong();
-                    }
-                    catch (Exception e){
-
-                    }
-                    break;
-                case ACTION_PREVIOUS:
-                    MusicPlayerService.this.previousSong();
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }
