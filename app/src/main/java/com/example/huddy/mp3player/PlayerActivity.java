@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -36,6 +37,7 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
      */
     ImageButton btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious, btnShuffle;
     ImageView songCover;
+    Button btnDownload;
     TextView tvArtist,tvTittle, tvTimeToEnd, tvTimeElapsed,tvIndex;
     ArrayList<Song> songList;
     int songIndex;
@@ -127,6 +129,16 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         btnNext = (ImageButton) findViewById(R.id.buttonNext);
         btnShuffle = (ImageButton)findViewById(R.id.buttonShuffle);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
+        btnDownload = (Button)findViewById(R.id.buttonDownload);
+        btnDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //SongDownloadManager mSongDownload = new SongDownloadManager(getApplicationContext());
+                //mSongDownload.startDownload();
+                Intent youtubeActivity = new Intent(PlayerActivity.this,YouTubeSearchActivity.class);
+                startActivity(youtubeActivity);
+            }
+        });
 
 
         songCover = (ImageView)findViewById(R.id.imageViewCover);
