@@ -8,6 +8,10 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.Channel;
+import com.google.api.services.youtube.model.ChannelListResponse;
+import com.google.api.services.youtube.model.PlaylistItem;
+import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 
@@ -21,6 +25,7 @@ import java.util.List;
 public class YouTubeConnecter {
     private YouTube youtube;
     private YouTube.Search.List query;
+    private YouTube.PlaylistItems.List playlist;
 
     // Your developer key goes here
     public static final String KEY
@@ -44,13 +49,42 @@ public class YouTubeConnecter {
         }
     }
 
+
+    public List<YouTubeItem> getSpecificChannelData(String playlistID)
+    {
+        try {
+            playlist = youtube.playlistItems().list("snippet").setPlaylistId(playlistID);
+            playlist.setKey(KEY);
+            playlist.setMaxResults((long)20);
+
+            //playlist.setId(spininRecordsID);
+            playlist.setFields("items(snippet/resourceId/videoId,snippet/title,snippet/description,snippet/thumbnails/default/url)");
+            PlaylistItemListResponse playlistItems = playlist.execute();
+            List<PlaylistItem> results = playlistItems.getItems();
+            List<YouTubeItem> items = new ArrayList<>();
+
+
+            for(PlaylistItem result:results)
+            {
+                YouTubeItem item = new YouTubeItem(result.getSnippet().getTitle(),result.getSnippet().getDescription(),
+                    result.getSnippet().getThumbnails().getDefault().getUrl(),result.getSnippet().getResourceId().getVideoId());
+                items.add(item);
+            }
+            return items;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
     public List<YouTubeItem> search(String keywords){
         query.setQ(keywords);
+        query.setMaxResults((long)20);
         try{
             SearchListResponse response = query.execute();
             List<SearchResult> results = response.getItems();
 
-            List<YouTubeItem> items = new ArrayList<YouTubeItem>();
+            List<YouTubeItem> items = new ArrayList<>();
             for(SearchResult result:results){
                 YouTubeItem item = new YouTubeItem(result.getSnippet().getTitle(),result.getSnippet().getDescription(),
                         result.getSnippet().getThumbnails().getDefault().getUrl(),result.getId().getVideoId());

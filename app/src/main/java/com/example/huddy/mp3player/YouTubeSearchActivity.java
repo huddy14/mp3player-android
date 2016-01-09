@@ -1,6 +1,11 @@
 package com.example.huddy.mp3player;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -18,6 +23,7 @@ import android.widget.TextView;
 import java.util.List;
 import java.util.logging.LogRecord;
 import android.os.Handler;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -25,6 +31,7 @@ public class YouTubeSearchActivity extends AppCompatActivity {
 
     private EditText searchInput;
     private ListView videosFound;
+    private YouTubeItemAdapter youTubeItemAdapter;
     private Handler handler;
     private Button btn;
     private List<YouTubeItem> searchResults;
@@ -63,40 +70,48 @@ public class YouTubeSearchActivity extends AppCompatActivity {
 
     private void searchOnYoutube(final String keywords)
     {
-        new Thread(){
-            public void run(){
-                YouTubeConnecter yc = new YouTubeConnecter(getApplicationContext());
-                searchResults = yc.search(keywords);
-                handler.post(new Runnable(){
-                    public void run(){
-                        updateVideosFound();
-                    }
-                });
+        class GetYoutubeResults extends AsyncTask<Void,Void,Void>
+        {
+            ProgressDialog loading;
+            ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mWifi = connManager.getActiveNetworkInfo();
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                loading = ProgressDialog.show(YouTubeSearchActivity.this,"Fetching data","Please wait...",false,false);
+
             }
-        }.start();
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                loading.dismiss();
+                updateVideosFound();
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                //TODO: put some ifs so updateVideosFound wont return null pointer, fix this shit
+                //if(mWifi.isConnected() && mWifi.getType() == ConnectivityManager.TYPE_WIFI) {
+                    YouTubeConnecter yc = new YouTubeConnecter(getApplicationContext());
+                    searchResults = yc.search(keywords);
+                    return null;
+               // }
+//                else
+//                {
+//                    Toast.makeText(getApplicationContext(), "No wifi connection \ncant continue fetching",
+//                            Toast.LENGTH_LONG).show();
+//                    return null;
+//                }
+            }
+        }
+        GetYoutubeResults results = new GetYoutubeResults();
+        results.execute();
     }
 
     private void updateVideosFound() {
-        ArrayAdapter<YouTubeItem> adapter = new ArrayAdapter<YouTubeItem>(getApplicationContext(), R.layout.youtube_list_item, searchResults) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = getLayoutInflater().inflate(R.layout.youtube_list_item, parent, false);
-                }
-                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.video_thumbnail);
-                TextView title = (TextView) convertView.findViewById(R.id.video_title);
-                TextView description = (TextView) convertView.findViewById(R.id.video_description);
-
-                YouTubeItem searchResult = searchResults.get(position);
-
-                Picasso.with(getApplicationContext()).load(searchResult.getThumbnailURL()).into(thumbnail);
-                title.setText(searchResult.getTitle());
-                description.setText(searchResult.getDescription());
-                return convertView;
-            }
-        };
-
-        videosFound.setAdapter(adapter);
+        youTubeItemAdapter = new YouTubeItemAdapter(this,R.layout.youtube_list_item,searchResults);
+        videosFound.setAdapter(youTubeItemAdapter);
     }
 
     private void addClickListener(){

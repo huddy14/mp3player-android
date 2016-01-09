@@ -35,6 +35,10 @@
 
         <activity android:name=".YouTubeSearchActivity" >
         </activity>
+        <activity android:name=".MusicGenresActivity" >
+        </activity>
+        <activity android:name=".GenresPlaylistActivity" >
+        </activity>
     </application>
 
 </manifest>
