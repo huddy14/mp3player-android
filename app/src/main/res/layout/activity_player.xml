@@ -35,41 +35,45 @@
                 android:layout_marginRight="5dp"
                 android:id="@+id/buttonBack"
                 android:background="#0000"
-                android:src="@drawable/search_icon_player"
+                android:src="@drawable/search_small_icon"
 
-                />
+                android:layout_weight="1" />
 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/shuffleoff"
                 android:background="#0000"
-                android:id="@+id/buttonShuffle" />
+                android:id="@+id/buttonShuffle"
+                android:layout_weight="1" />
 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:id="@+id/buttonGenres"
-                android:src="@drawable/genres_icon"
-                android:background="#0000" />
+                android:src="@drawable/playlista"
+                android:background="#0000"
+                android:layout_weight="1" />
 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:id="@+id/buttonDownload"
-                android:src="@drawable/youtube_icon_big"
-                android:background="#0000" />
+                android:src="@drawable/youtube_small_icon"
+                android:background="#0000"
+                android:layout_weight="1" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Medium Text"
                 android:id="@+id/textViewIndex"
                 android:textAlignment="gravity"
                 android:singleLine="false"
                 android:gravity="right"
-                android:textColor="#ffff" />
+                android:textColor="#ffff"
+                android:layout_weight="1"
+                android:layout_gravity="bottom" />
 
         </LinearLayout>
 
