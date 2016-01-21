@@ -8,6 +8,8 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.List;
@@ -26,6 +28,15 @@ public class GenresPlaylistActivity extends AppCompatActivity {
         playlistId = intent.getStringExtra("PLAYLIST_ID");
         setContentView(R.layout.activity_genres_playlist);
         lvPlaylist = (ListView)findViewById(R.id.lvPlaylist);
+        lvPlaylist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> av, View v, int pos, long id) {
+                SongDownloadManager mSongDownload = new SongDownloadManager(getApplicationContext());
+                Object s = av.getAdapter().getItem(pos);
+                YouTubeItem youtubeItem = (YouTubeItem) s;
+                mSongDownload.download(youtubeItem.getId(), youtubeItem.getTitle());
+            }
+        });
         getPlaylist(playlistId);
 
     }
@@ -57,7 +68,7 @@ public class GenresPlaylistActivity extends AppCompatActivity {
                 //TODO: put some ifs so updateVideosFound wont return null pointer, fix this shit
                 //if(mWifi.isConnected() && mWifi.getType() == ConnectivityManager.TYPE_WIFI) {
                 YouTubeConnecter yc = new YouTubeConnecter(getApplicationContext());
-                playlist = yc.getSpecificChannelData(playlistId);
+                playlist = yc.getPlaylist(playlistId);
                 return null;
                 // }
 //                else

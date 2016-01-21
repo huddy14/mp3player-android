@@ -50,84 +50,80 @@ public class MusicGenresActivity extends AppCompatActivity {
         hiphopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",HIPHOP_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(HIPHOP_ID);
+
             }
         });
 
         hiphopplBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",HIPHOP_PL_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(HIPHOP_PL_ID);
+
             }
         });
 
         ragaeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",RAGAEE_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(RAGAEE_ID);
+
             }
         });
 
         classicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",CLASSIC_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(CLASSIC_ID);
+
             }
         });
 
         partyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",PARTY_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(PARTY_ID);
+
             }
         });
 
         rockBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",ROCK_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(ROCK_ID);
+
             }
         });
 
         popBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",POP_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(POP_ID);
+
             }
         });
 
         hardstyleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",HARDSTYLE_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(HARDSTYLE_ID);
+
             }
         });
 
         houseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
-                iPlaylist.putExtra("PLAYLIST_ID",HOUSE_ID);
-                startActivity(iPlaylist);
+                startGenresPlaylistActivity(HOUSE_ID);
             }
         });
     }
 
+    private void startGenresPlaylistActivity(String genres)
+    {
+        Intent iPlaylist = new Intent(MusicGenresActivity.this,GenresPlaylistActivity.class);
+        iPlaylist.putExtra("PLAYLIST_ID",genres);
+        startActivity(iPlaylist);
+    }
 
 }

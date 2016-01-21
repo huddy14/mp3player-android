@@ -22,7 +22,7 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:alpha="0.7"
+            android:alpha="0.9"
             android:background="#000000"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
@@ -34,8 +34,8 @@
                 android:text="GO BACK"
                 android:layout_marginRight="5dp"
                 android:id="@+id/buttonBack"
-                android:background="#A7BFC7"
-                android:src="@drawable/search"
+                android:background="#0000"
+                android:src="@drawable/search_icon_player"
 
                 />
 
@@ -43,8 +43,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/shuffleoff"
-                android:background="#A7BFC7"
+                android:background="#0000"
                 android:id="@+id/buttonShuffle" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:id="@+id/buttonGenres"
+                android:src="@drawable/genres_icon"
+                android:background="#0000" />
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:id="@+id/buttonDownload"
+                android:src="@drawable/youtube_icon_big"
+                android:background="#0000" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -57,18 +71,6 @@
                 android:gravity="right"
                 android:textColor="#ffff" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Download"
-                android:id="@+id/buttonDownload" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="New Button"
-                android:id="@+id/buttonGenres" />
         </LinearLayout>
 
     </RelativeLayout>

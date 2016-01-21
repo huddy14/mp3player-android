@@ -50,12 +50,12 @@ public class YouTubeConnecter {
     }
 
 
-    public List<YouTubeItem> getSpecificChannelData(String playlistID)
+    public List<YouTubeItem> getPlaylist(String playlistID)
     {
         try {
             playlist = youtube.playlistItems().list("snippet").setPlaylistId(playlistID);
             playlist.setKey(KEY);
-            playlist.setMaxResults((long)20);
+            playlist.setMaxResults((long)50);
 
             //playlist.setId(spininRecordsID);
             playlist.setFields("items(snippet/resourceId/videoId,snippet/title,snippet/description,snippet/thumbnails/default/url)");

@@ -35,9 +35,8 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
     /**
      * Variables
      */
-    ImageButton btnGoBack, btnStart, btnStop, btnPause, btnNext, btnPrevious, btnShuffle;
+    ImageButton btnGoBack, btnStart, btnDownload,btnGenres, btnNext, btnPrevious, btnShuffle;
     ImageView songCover;
-    Button btnDownload,btnGenres;
     TextView tvArtist,tvTittle, tvTimeToEnd, tvTimeElapsed,tvIndex;
     ArrayList<Song> songList;
     int songIndex;
@@ -129,8 +128,8 @@ public class PlayerActivity extends Activity implements MusicPlayerService.CallB
         btnNext = (ImageButton) findViewById(R.id.buttonNext);
         btnShuffle = (ImageButton)findViewById(R.id.buttonShuffle);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
-        btnDownload = (Button)findViewById(R.id.buttonDownload);
-        btnGenres = (Button)findViewById(R.id.buttonGenres);
+        btnDownload = (ImageButton)findViewById(R.id.buttonDownload);
+        btnGenres = (ImageButton)findViewById(R.id.buttonGenres);
         btnGenres.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

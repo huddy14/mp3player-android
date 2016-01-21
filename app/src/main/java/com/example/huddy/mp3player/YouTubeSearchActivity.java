@@ -35,7 +35,6 @@ public class YouTubeSearchActivity extends AppCompatActivity {
     private Handler handler;
     private Button btn;
     private List<YouTubeItem> searchResults;
-    private final String youtubeURLheader = "https://www.youtube.com/watch?v=";
 
 
     @Override
