@@ -82,4 +82,9 @@ public class GenresPlaylistActivity extends AppCompatActivity {
         GetPlaylist mPlaylist = new GetPlaylist();
         mPlaylist.execute();
     }
+    //TODO: tittle change
+    private void setTittle(String a)
+    {
+
+    }
 }

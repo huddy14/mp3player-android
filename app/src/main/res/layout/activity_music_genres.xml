@@ -18,18 +18,28 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/ragaee"
+            android:src="@drawable/rege"
+            android:scaleType="fitXY"
+            android:padding="3dp"
             android:layout_weight="1" />
 
         <ImageButton
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/hiphop"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:src="@drawable/hipho"
+            android:scaleType="fitXY"
+            android:padding="3dp"
+            />
 
         <ImageButton
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/hiphoppl"
+            android:src="@drawable/hiphoppl"
+            android:scaleType="fitXY"
+            android:padding="3dp"
             android:layout_weight="1" />
     </LinearLayout>
 
@@ -43,18 +53,27 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/pop"
+            android:src="@drawable/pop1"
+            android:scaleType="fitXY"
+            android:padding="3dp"
             android:layout_weight="1" />
 
         <ImageButton
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/rock"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:src="@drawable/rock"
+            android:scaleType="fitXY"
+            android:padding="3dp"/>
 
         <ImageButton
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/party"
+            android:src="@drawable/party"
+            android:scaleType="fitXY"
+            android:padding="3dp"
             android:layout_weight="1" />
     </LinearLayout>
 
@@ -68,18 +87,27 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/hardstyle"
+            android:src="@drawable/hardstyle"
+            android:scaleType="fitXY"
+            android:padding="3dp"
             android:layout_weight="1" />
 
         <ImageButton
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/house"
+            android:src="@drawable/house"
+            android:scaleType="fitXY"
+            android:padding="3dp"
             android:layout_weight="1" />
 
         <ImageButton
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/classic"
+            android:src="@drawable/classic"
+            android:scaleType="fitXY"
+            android:padding="3dp"
             android:layout_weight="1" />
     </LinearLayout>
 </LinearLayout>
